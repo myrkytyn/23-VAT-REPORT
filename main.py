@@ -4,10 +4,10 @@ import openpyxl
 import os
 import sys
 
-excel_source_path="/home/maksym/Maks/Projects/23-tax-invoice/excel_source_path/"
-excel_target_path="/home/maksym/Maks/Projects/23-tax-invoice/excel_target_path/"
-xml_source_path="/home/maksym/Maks/Projects/23-tax-invoice/xml_source_path/"
-xml_target_path="/home/maksym/Maks/Projects/23-tax-invoice/xml_target_path/"
+excel_source_path="/home/maksym/Maks/Projects/23-VAT-REPORT/excel_source_path/"
+excel_target_path="/home/maksym/Maks/Projects/23-VAT-REPORT/excel_target_path/"
+xml_source_path="/home/maksym/Maks/Projects/23-VAT-REPORT/xml_source_path/"
+xml_target_path="/home/maksym/Maks/Projects/23-VAT-REPORT/xml_target_path/"
 
 #Create functionality to add filepath manually
     #filePath = input('Please enter the path of the folder where the excel files are stored: ')
