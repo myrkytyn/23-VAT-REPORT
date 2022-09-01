@@ -3,8 +3,8 @@ from tokenize import String
 from xml.etree.ElementTree import tostring
 import openpyxl
 import os
-import sys
 import re
+from loguru import logger
 
 excel_source_path="/home/maksym/Maks/Projects/23-VAT-REPORT/excel_source_path/"
 excel_target_path="/home/maksym/Maks/Projects/23-VAT-REPORT/excel_target_path/"
@@ -22,7 +22,7 @@ config=json.load(open("config.json","r"))
 
 
 def main():
-    print("### PROGRAM STARTED ###\n")
+    logger.info("### PROGRAM STARTED ###")
     #List all files to var
     excel_source_file=list_excels(excel_path=excel_source_path)
     #For all files in dir
@@ -32,26 +32,26 @@ def main():
         unmerge_cells(ws)
         remove_rows_total(ws)
         add_formulas(ws)
-        get_names(ws)
+        legal_name, non_excise_dishes, non_excise_groups = get_names(ws)
+        non_excise_dishes_formulas(ws, non_excise_dishes)
         date=get_date(ws)
         wb.save(excel_target_path+date+"_"+excel_source_file[i])
-    print("\n### EXCEL PART COMPLETED ###")   
+    logger.info("### EXCEL PART COMPLETED ###")   
 
     #For all target excels. Working with XML
-    excel_target_file=list_excels(excel_path=excel_target_path)
-    for i in range(0, len(excel_target_file)):
-        wb = openpyxl.load_workbook(excel_target_file[i])
-        ws = wb.active
+    #excel_target_file=list_excels(excel_path=excel_target_path)
+    #for i in range(0, len(excel_target_file)):
+    #    wb = openpyxl.load_workbook(excel_target_file[i])
+    #    ws = wb.active
 
-    print("\n### XML PART COMPLETED ###") 
+    #logger.info("### XML PART COMPLETED ###") 
 
-    print("\n### COMPLETED ###")                
+    logger.info("### PROGRAM COMPLETED ###")                
 
 def list_excels(excel_path):
     os.chdir(excel_path)
     excel_files = os.listdir('.')
-    print(f"In directory {excel_path} there are files:")
-    print(*excel_files, sep = "\n")
+    logger.info(f"In directory {excel_path} are files: \n{excel_files}")
     return excel_files
 
 def unmerge_cells(ws):
@@ -86,24 +86,38 @@ def add_formulas(ws):
             ws[f'J{cell.row}'] = f"=K{cell.row}/E{cell.row}"
 
 #Non excise dishes check
-#def non_excise_dishes_formulas(ws,):
-#    for cell in ws['D']:
-#        if cell.value == :
-#            ws[f'I{cell.row}'] = f"=F{cell.row}"
+def non_excise_dishes_formulas(ws, non_excise_dishes):
+    counter=0
+    for cell in ws['D']:
+        if cell.value in non_excise_dishes:
+            ws[f'I{cell.row}'] = f"=F{cell.row}"
+            counter+=1
+    logger.info(f"excise deleted for {counter} dishes")
 
 #Non excise groups check
-#def non_excise_dishes_formulas(ws):
-#    for column in ws.iter_columns():
-#        for cell in column:
+def non_excise_dishes_formulas(ws, non_excise_groups):
+    counter=0
+    for cell in ws['C']:
+        if cell.value in non_excise_groups:
+            ws[f'I{cell.row}'] = f"=F{cell.row}"
+            counter+=1
+    logger.info(f"excise deleted for {counter} dishes groups")
+
 
 def get_names(ws):
-    if ws['A6'].value == "Делікація Незалежності":
-        restaurant="Delikacia"
+    restaurant = ws['A6'].value
+    if restaurant in config["legal_entities"]:
         iiko_name=config["legal_entities"][restaurant]["iiko_name"]
         legal_name=config["legal_entities"][restaurant]["legal_name"]
-        print(iiko_name,legal_name)
+        non_excise_dishes=config["legal_entities"][restaurant]["non_excise_dishes"]
+        non_excise_groups=config["legal_entities"][restaurant]["non_excise_groups"]
+        logger.info(f"In restaurant {iiko_name} are: \nnon excise dishes - {non_excise_dishes} \nnon excise groups - {non_excise_groups}")
+        return(legal_name, non_excise_dishes, non_excise_groups)
+    else:
+        logger.error(f"{ws['A6'].value} does not exist in JSON. Please check!")
 
 def get_date(ws):
+    #date to format ddmmyy
     date = re.sub("[^0-9]", "", ws['A3'].value)
     return date
 
