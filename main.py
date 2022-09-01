@@ -15,7 +15,8 @@ config=json.load(open("config.json","r"))
 #Create functionality to add filepath manually
     #filePath = input('Please enter the path of the folder where the excel files are stored: ')
 #Add check for overwriting
-#Use col_range in remove rows func >>> col_range = ws['C:D']
+#Use col_range in remove rows func >>> col_range = ws['C:D'] (refactoring)
+#Think what to co with document number
 #Write instruction for creating M5 report from IIKO
 
 

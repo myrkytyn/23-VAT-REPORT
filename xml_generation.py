@@ -7,8 +7,8 @@ def generate_xml(tin,c_doc,c_doc_sub,c_doc_ver,c_doc_type,c_doc_cnt,c_reg,c_raj,
     DECLARHEAD=ET.Element("DECLARHEAD")
     root.append(DECLARHEAD)
     ET.SubElement(DECLARHEAD, "TIN").text=tin
-    ET.SubElement(DECLARHEAD, "C_DOC").text=c_doc
-    ET.SubElement(DECLARHEAD, "C_DOC_SUB").text=c_doc_sub
+    ET.SubElement(DECLARHEAD, "C_DOC").text="J12"
+    ET.SubElement(DECLARHEAD, "C_DOC_SUB").text=
     ET.SubElement(DECLARHEAD, "C_DOC_VER").text=c_doc_ver
     ET.SubElement(DECLARHEAD, "C_DOC_TYPE").text=c_doc_type
     ET.SubElement(DECLARHEAD, "C_DOC_CNT").text=c_doc_cnt
