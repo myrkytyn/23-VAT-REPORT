@@ -14,10 +14,8 @@ config=json.load(open("config.json","r"))
 
 #Create functionality to add filepath manually
     #filePath = input('Please enter the path of the folder where the excel files are stored: ')
-#Add перевірку на перезапис
+#Add check for overwriting
 #Use col_range in remove rows func >>> col_range = ws['C:D']
-#Add Coffee logic (not use accise)
-#Add logic with legal entities (Fabbrica, Delikacia)
 #Write instruction for creating M5 report from IIKO
 
 
@@ -34,6 +32,7 @@ def main():
         add_formulas(ws)
         legal_name, non_excise_dishes, non_excise_groups = get_names(ws)
         non_excise_dishes_formulas(ws, non_excise_dishes)
+        non_excise_groups_formulas(ws, non_excise_groups)
         date=get_date(ws)
         wb.save(excel_target_path+date+"_"+excel_source_file[i])
     logger.info("### EXCEL PART COMPLETED ###")   
@@ -95,13 +94,20 @@ def non_excise_dishes_formulas(ws, non_excise_dishes):
     logger.info(f"excise deleted for {counter} dishes")
 
 #Non excise groups check
-def non_excise_dishes_formulas(ws, non_excise_groups):
-    counter=0
+def non_excise_groups_formulas(ws, non_excise_groups):
+    counter_groups=0
+    counter_dishes=0
     for cell in ws['C']:
         if cell.value in non_excise_groups:
             ws[f'I{cell.row}'] = f"=F{cell.row}"
-            counter+=1
-    logger.info(f"excise deleted for {counter} dishes groups")
+            counter_dishes+=1
+            i=1
+            while ws[f"C{cell.row+i}"].value==None:
+                ws[f'I{cell.row}'] = f"=F{cell.row}"
+                counter_dishes+=1
+                i+=1
+            counter_groups+=1
+    logger.info(f"Excise deleted for {counter_dishes} dishes in {counter_groups} groups")
 
 
 def get_names(ws):
