@@ -3,6 +3,8 @@ excel_source_path/
 excel_target_path/
 xml_source_path/
 xml_target_path/
+my/
 *.json
 *.xml
 *.txt
+__pycache__/

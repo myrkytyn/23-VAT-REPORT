@@ -6,13 +6,15 @@ import openpyxl
 import os
 import re
 from loguru import logger
+from xml_generation import generate_xml
 
 excel_source_path = "./excel_source_path/"
 excel_target_path = "./excel_target_path/"
 xml_target_path = "./xml_target_path/"
 
+date_cell = "A3"
 restaurant_cell = "A6"
-cooking_place = "B"
+cooking_place_col = "B"
 dishes_group_col = "C"
 dishes_col = "D"
 quantity_col = "E"
@@ -29,17 +31,26 @@ def main():
     try:
         global config
         config = json.load(open("config.json", "r"))
-    except:
+    except Exception as e:
         logger.error("Config File does not exist. Please check!")
+        logger.error(e)
         return
     # Get all files from directory
-    excel_source_file = list_excels(excel_source_path)
+    logger.info("### EXCEL PART STARTED ###")
+    try:
+        excel_source_file = list_excels(excel_source_path)
+    except Exception as e:
+        logger.error(
+            f"Error, source path {excel_source_path} not found. Current workid - {os.getcwd()}")
+        logger.error(e)
+        return
     for i in range(0, len(excel_source_file)):
         if excel_source_file[i].endswith(".xlsx"):
             try:
                 wb = openpyxl.load_workbook(excel_source_file[i])
-            except:
+            except Exception as e:
                 logger.error(f"Error opening {excel_source_file[i]} file")
+                logger.error(e)
                 return
             ws = wb.active
             unmerge_cells(ws)
@@ -49,24 +60,41 @@ def main():
             iiko_name, non_excise_dishes, non_excise_groups = get_info_xlsx(ws)
             non_excise_dishes_formulas(ws, non_excise_dishes)
             non_excise_groups_formulas(ws, non_excise_groups)
-            date = get_date(ws)
-            os.chdir("..")
-            if not os.path.exists(excel_target_path):
-                os.makedirs(excel_target_path)
+            date = get_date(ws)[0]
+            if not os.path.exists(f"../{excel_target_path}"):
+                os.makedirs(f"../{excel_target_path}")
             try:
-                wb.save(f"{excel_target_path}{date}_{iiko_name}.xlsx")
-            except:
-                logger.error(f"Error saving {excel_source_file[i]} file")
+                wb.save(f"../{excel_target_path}{date}_{iiko_name}.xlsx")
+            except Exception as e:
+                logger.error(
+                    f"Error saving {excel_target_path}{date}_{iiko_name}.xlsx file")
+                logger.error(e)
                 return
+            logger.info(f"File saved {excel_source_file[i]} file")
     logger.info("### EXCEL PART COMPLETED ###")
 
+    logger.info("### XML PART STARTED ###")
+    os.chdir("..")
     # For all target excels. Working with XML
-    # excel_target_file=list_excels(excel_path=excel_target_path)
-    # for i in range(0, len(excel_target_file)):
-    #    wb = openpyxl.load_workbook(excel_target_file[i])
-    #    ws = wb.active
-
-    # logger.info("### XML PART COMPLETED ###")
+    try:
+        excel_target_file = list_excels(excel_target_path)
+    except Exception as e:
+        logger.error(
+            f"Error, target path {excel_target_path} not found. Current workid - {os.getcwd()}")
+        logger.error(e)
+        return
+    for i in range(0, len(excel_target_file)):
+        if excel_source_file[i].endswith(".xlsx"):
+            wb = openpyxl.load_workbook(excel_target_file[i])
+            ws = wb.active
+            iiko_name, hnamesel, tin, hksel, htinsel, hbos, hkbos = get_info_xml(
+                ws)
+            date, year, month  = get_date(ws)
+            generate_xml(tin=tin, period_month=month, period_year=year, d_fill=date,
+                         hfill=date, hnamesel=hnamesel, hksel=hksel,
+                         htinsel=htinsel, hbos=hbos, hkbos=hkbos, iiko_name=iiko_name,
+                         xml_target_path=xml_target_path)
+    logger.info("### XML PART COMPLETED ###")
 
     logger.info("### PROGRAM COMPLETED ###")
 
@@ -85,14 +113,14 @@ def unmerge_cells(ws):
 
 def remove_rows_total(ws):
     # Removing rows with Total in column - Місце приготування
-    for cell in ws[cooking_place]:
+    for cell in ws[cooking_place_col]:
         if cell.value is not None:
-            if "Total" in cell.value:
+            if "Total" in cell.value or "всего" in cell.value:
                 ws.delete_rows(cell.row)
     # Removing rows with Total in column - Група страви
     for cell in ws[dishes_group_col]:
         if cell.value is not None:
-            if "Total" in cell.value:
+            if "Total" in cell.value or "всего" in cell.value:
                 ws.delete_rows(cell.row)
 
 
@@ -154,13 +182,35 @@ def get_info_xlsx(ws):
             f"In restaurant {iiko_name} are: \nnon excise dishes - {non_excise_dishes} \nnon excise groups - {non_excise_groups}")
         return (iiko_name, non_excise_dishes, non_excise_groups)
     else:
-        logger.error(f"{ws['A6'].value} does not exist in JSON. Please check!")
+        logger.error(
+            f"{ws[restaurant_cell].value} does not exist in JSON. Please check!")
+
+
+def get_info_xml(ws):
+    restaurant = ws[restaurant_cell].value
+    if restaurant in config["legal_entities"]:
+        iiko_name = config["legal_entities"][restaurant]["iiko_name"]
+        hnamesel = config["legal_entities"][restaurant]["legal_name"]
+        tin = config["legal_entities"][restaurant]["tin"]
+        hksel = config["legal_entities"][restaurant]["hksel"]
+        htinsel = config["legal_entities"][restaurant]["htinsel"]
+        hbos = config["legal_entities"][restaurant]["hbos"]
+        hkbos = config["legal_entities"][restaurant]["hkbos"]
+        return (iiko_name, hnamesel, tin, hksel, htinsel, hbos, hkbos)
+    else:
+        logger.error(
+            f"{ws[restaurant_cell].value} does not exist in JSON. Please check!")
 
 
 def get_date(ws):
     # date to format ddmmyyyy
-    date = re.sub("[^0-9]", "", ws['A3'].value)
-    return date
+    date = re.sub("[^0-9]", "", ws[date_cell].value)
+    year = date[-4]
+    if date[2] == "0":
+        month = date[3]
+    else:
+        month = date[2]+date[3]
+    return (date, year, month)
 
 
 if __name__ == "__main__":
