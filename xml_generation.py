@@ -3,10 +3,13 @@ from loguru import logger
 import os
 
 
-def generate_xml(tin, period_month, period_year, d_fill, hfill, hnamesel, hksel, htinsel, hbos, hkbos, iiko_name, xml_target_path):
+def generate_root():
     root = ET.Element("DECLAR")
     root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
     root.set("xsi:noNamespaceSchemaLocation", "J1201013.XSD")
+    return root
+
+def generate_head(root, tin, period_month, period_year, d_fill):
     DECLARHEAD = ET.Element("DECLARHEAD")
     root.append(DECLARHEAD)
     ET.SubElement(DECLARHEAD, "TIN").text = tin
@@ -26,6 +29,8 @@ def generate_xml(tin, period_month, period_year, d_fill, hfill, hnamesel, hksel,
     ET.SubElement(DECLARHEAD, "D_FILL").text = d_fill
     ET.SubElement(DECLARHEAD, "SOFTWARE").text = "MEDOC"
 
+
+def generate_body(root, hfill, hnamesel, hksel, htinsel):
     DECLARBODY = ET.Element("DECLARBODY")
     root.append(DECLARBODY)
     ET.SubElement(DECLARBODY, "R01G1").set("xsi:nil", "true")
@@ -57,6 +62,9 @@ def generate_xml(tin, period_month, period_year, d_fill, hfill, hnamesel, hksel,
     ET.SubElement(DECLARBODY, "R01G8").set("xsi:nil", "true")
     ET.SubElement(DECLARBODY, "R01G10").set("xsi:nil", "true")
     ET.SubElement(DECLARBODY, "R02G11").set("xsi:nil", "true")
+    return DECLARBODY
+
+def generate_b_part():
 #    ET.SubElement(DECLARBODY, "RXXXXG3S").text
 #    ET.SubElement(DECLARBODY, "RXXXXG4").text
 #    ET.SubElement(DECLARBODY, "RXXXXG32").text
@@ -70,17 +78,14 @@ def generate_xml(tin, period_month, period_year, d_fill, hfill, hnamesel, hksel,
 #    ET.SubElement(DECLARBODY, "RXXXXG010").text
 #    ET.SubElement(DECLARBODY, "RXXXXG11_10").text
 #    ET.SubElement(DECLARBODY, "RXXXXG011").text
+    return
+
+def generate_ending(DECLARBODY, hbos, hkbos):
     ET.SubElement(DECLARBODY, "HBOS").text = hbos
     ET.SubElement(DECLARBODY, "HKBOS").text = hkbos
     ET.SubElement(DECLARBODY, "R003G10S").set("xsi:nil", "true")
 
+def generate_xml(root):
     tree = ET.ElementTree(root)
-    if not os.path.exists(f"../{xml_target_path}"):
-        os.makedirs(f"../{xml_target_path}")
-    try:
-        tree.write(f"../{xml_target_path}{hfill}_{iiko_name}.xml", encoding="windows-1251", xml_declaration=True)
-    except Exception as e:
-        logger.error(f"Error saving {xml_target_path}{hfill}_{iiko_name}.xml file")
-        logger.error(e)
-        return
-    
+    ET.indent(tree, space="\t", level=0)
+    return tree
