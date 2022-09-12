@@ -8,3 +8,6 @@ my/
 *.xml
 *.txt
 __pycache__/
+logs/
+dist/
+build/

@@ -26,18 +26,20 @@ price_col = "K"
 
 
 def main():
+    logger.add("logs/file_{time}.log")
     logger.info("### PROGRAM STARTED ###")
     # Work with config.json
     #hnum = input("Введіть номер з якого почати нумерувати податкові накладні: ")
     try:
         global config
-        config = json.load(open("config.json", "r"))
+        config = json.load(open("config.json", "r", encoding="utf-8"))
     except Exception as e:
         logger.error("Config File does not exist. Please check!")
         logger.error(e)
         return
     # Get all files from directory
     logger.info("### EXCEL PART STARTED ###")
+    
     try:
         excel_source_file = list_excels(excel_source_path)
     except Exception as e:
@@ -76,55 +78,9 @@ def main():
             logger.info(f"File saved {excel_source_file[i]} file")
     logger.info("### EXCEL PART COMPLETED ###")
 
-    input("Press Enter to continue...")
-
-    logger.info("### XML PART STARTED ###")
-    os.chdir("..")
-    # For all target excels. Working with XML
-    try:
-        excel_target_file = list_excels(excel_target_path)
-    except Exception as e:
-        logger.error(
-            f"Error, target path {excel_target_path} not found. Current workid - {os.getcwd()}")
-        logger.error(e)
-        return
-    for i in range(0, len(excel_target_file)):
-        if excel_source_file[i].endswith(".xlsx"):
-            wb = openpyxl.load_workbook(excel_target_file[i], data_only=True)
-            ws = wb.active
-            iiko_name, hnamesel, tin, hksel, htinsel, hbos, hkbos = get_info_xml(
-                ws, restaurant_cell, config)
-            date, year, month = get_date(ws, date_cell)
-            root = generate_root()
-            generate_head(root, tin, period_month=month,
-                          period_year=year, d_fill=date)
-            declarbody = generate_body(root=root, hfill=date, hnamesel=hnamesel, hksel=hksel,
-                                       htinsel=htinsel)
-            row_num = 1
-            for row in ws.iter_rows(min_row=6, max_row=ws.max_row):
-                cell_row = str(row[0].row)
-                dish = str(ws[f"{dishes_col}{cell_row}"].value)
-                qnt = str(ws[f"{quantity_col}{cell_row}"].value)
-                price = str(ws[f"{price_col}{cell_row}"].value)
-                row_str = str(row_num)
-                generate_b_part(declarbody, dish=dish,
-                                row=row_str, qnt=qnt, price=price)
-                row_num += 1
-            generate_ending(declarbody, hbos=hbos, hkbos=hkbos)
-            tree = generate_xml(root)
-            if not os.path.exists(f"../{xml_target_path}"):
-                os.makedirs(f"../{xml_target_path}")
-            try:
-                tree.write(f"../{xml_target_path}{date}_{iiko_name}.xml",
-                           encoding="windows-1251", xml_declaration=True)
-            except Exception as e:
-                logger.error(
-                    f"Error saving {xml_target_path}{date}_{iiko_name}.xml file")
-                logger.error(e)
-                return
-    logger.info("### XML PART COMPLETED ###")
-
     logger.info("### PROGRAM COMPLETED ###")
+
+    input("Натисніть Enter для виходу з програми")
 
 
 if __name__ == "__main__":
