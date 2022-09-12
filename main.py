@@ -76,6 +76,8 @@ def main():
             logger.info(f"File saved {excel_source_file[i]} file")
     logger.info("### EXCEL PART COMPLETED ###")
 
+    input("Press Enter to continue...")
+
     logger.info("### XML PART STARTED ###")
     os.chdir("..")
     # For all target excels. Working with XML
@@ -88,7 +90,7 @@ def main():
         return
     for i in range(0, len(excel_target_file)):
         if excel_source_file[i].endswith(".xlsx"):
-            wb = openpyxl.load_workbook(excel_target_file[i])
+            wb = openpyxl.load_workbook(excel_target_file[i], data_only=True)
             ws = wb.active
             iiko_name, hnamesel, tin, hksel, htinsel, hbos, hkbos = get_info_xml(
                 ws, restaurant_cell, config)
@@ -98,6 +100,16 @@ def main():
                           period_year=year, d_fill=date)
             declarbody = generate_body(root=root, hfill=date, hnamesel=hnamesel, hksel=hksel,
                                        htinsel=htinsel)
+            row_num = 1
+            for row in ws.iter_rows(min_row=6, max_row=ws.max_row):
+                cell_row = str(row[0].row)
+                dish = str(ws[f"{dishes_col}{cell_row}"].value)
+                qnt = str(ws[f"{quantity_col}{cell_row}"].value)
+                price = str(ws[f"{price_col}{cell_row}"].value)
+                row_str = str(row_num)
+                generate_b_part(declarbody, dish=dish,
+                                row=row_str, qnt=qnt, price=price)
+                row_num += 1
             generate_ending(declarbody, hbos=hbos, hkbos=hkbos)
             tree = generate_xml(root)
             if not os.path.exists(f"../{xml_target_path}"):
