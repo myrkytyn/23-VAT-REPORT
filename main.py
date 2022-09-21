@@ -37,6 +37,7 @@ def main():
     #input("Press Enter to continue...")
     # xml_part()
     logger.info("### ПРОГРАМА ЗАКІНЧИЛА РОБОТУ ###")
+    input("Мені видається, що все пройшло добре. Натисни Enter для виходу")
 
 
 def excel_part():
@@ -48,7 +49,7 @@ def excel_part():
     hnum = int(hnum)
     try:
         global config
-        config = json.load(open("config.json", "r"))
+        config = json.load(open("config.json", "r", encoding="utf-8"))
     except Exception as e:
         logger.error(
             "Схоже, що конфігураційного файлу не існує. Будь ласка. перевір!")
