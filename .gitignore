@@ -6,7 +6,6 @@ xml_target_path/
 my/
 *.json
 *.xml
-*.txt
 __pycache__/
 iiko_reports/
 excel_files_generated/
