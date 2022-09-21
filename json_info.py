@@ -8,11 +8,11 @@ def get_info_xlsx(ws, restaurant_cell, config):
         non_excise_dishes = config["legal_entities"][restaurant]["non_excise_dishes"]
         non_excise_groups = config["legal_entities"][restaurant]["non_excise_groups"]
         logger.info(
-            f"In restaurant {iiko_name} are: \nnon excise dishes - {non_excise_dishes} \nnon excise groups - {non_excise_groups}")
+            f"В ресторані {iiko_name}: \nбезакцизні страви - {non_excise_dishes} \nбезакцизні групи страв - {non_excise_groups}")
         return (iiko_name, non_excise_dishes, non_excise_groups)
     else:
         logger.error(
-            f"{ws[restaurant_cell].value} does not exist in JSON. Please check!")
+            f"{ws[restaurant_cell].value} не існує в файлі JSON. Будь ласка, перевір!")
 
 
 def get_info_xml(ws, restaurant_cell, config):
@@ -28,4 +28,4 @@ def get_info_xml(ws, restaurant_cell, config):
         return (iiko_name, hnamesel, tin, hksel, htinsel, hbos, hkbos)
     else:
         logger.error(
-            f"{ws[restaurant_cell].value} does not exist in JSON. Please check!")
+            f"{ws[restaurant_cell].value} не існує в файлі JSON. Будь ласка, перевір!")

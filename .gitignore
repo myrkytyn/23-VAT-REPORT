@@ -8,3 +8,8 @@ my/
 *.xml
 *.txt
 __pycache__/
+iiko_reports/
+excel_files_generated/
+xml_files_generated/
+build/
+dist/

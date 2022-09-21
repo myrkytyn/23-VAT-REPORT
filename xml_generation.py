@@ -9,6 +9,7 @@ def generate_root():
     root.set("xsi:noNamespaceSchemaLocation", "J1201013.XSD")
     return root
 
+
 def generate_head(root, tin, period_month, period_year, d_fill):
     DECLARHEAD = ET.Element("DECLARHEAD")
     root.append(DECLARHEAD)
@@ -64,26 +65,66 @@ def generate_body(root, hfill, hnamesel, hksel, htinsel):
     ET.SubElement(DECLARBODY, "R02G11").set("xsi:nil", "true")
     return DECLARBODY
 
-def generate_b_part():
-#    ET.SubElement(DECLARBODY, "RXXXXG3S").text
-#    ET.SubElement(DECLARBODY, "RXXXXG4").text
-#    ET.SubElement(DECLARBODY, "RXXXXG32").text
-#    ET.SubElement(DECLARBODY, "RXXXXG33").text (nil)
-#    ET.SubElement(DECLARBODY, "RXXXXG4S").text
-#    ET.SubElement(DECLARBODY, "RXXXXG105_2S").text
-#    ET.SubElement(DECLARBODY, "RXXXXG5").text
-#    ET.SubElement(DECLARBODY, "RXXXXG6").text
-#    ET.SubElement(DECLARBODY, "RXXXXG008").text
-#    ET.SubElement(DECLARBODY, "RXXXXG009").text (nil)
-#    ET.SubElement(DECLARBODY, "RXXXXG010").text
-#    ET.SubElement(DECLARBODY, "RXXXXG11_10").text
-#    ET.SubElement(DECLARBODY, "RXXXXG011").text
-    return
+
+def generate_b_part(DECLARBODY, dish, row, qnt, price):
+    RXXXXG3S = ET.SubElement(DECLARBODY, "RXXXXG3S")
+    RXXXXG3S.text = dish
+    RXXXXG3S.set("ROWNUM", row)
+
+    #RXXXXG4=ET.SubElement(DECLARBODY, "RXXXXG4")
+    #RXXXXG4.text = zed
+    #RXXXXG4.set("ROWNUM", row)
+
+    RXXXXG32 = ET.SubElement(DECLARBODY, "RXXXXG32")
+    RXXXXG32.set("ROWNUM", row)
+    RXXXXG32.set("xsi:nil", "true")
+
+    RXXXXG33 = ET.SubElement(DECLARBODY, "RXXXXG33")
+    RXXXXG33.set("ROWNUM", row)
+    RXXXXG33.set("xsi:nil", "true")
+
+    RXXXXG4S = ET.SubElement(DECLARBODY, "RXXXXG4S")
+    RXXXXG4S.set("ROWNUM", row)
+    RXXXXG4S.text = "порц"
+
+    RXXXXG105_2S = ET.SubElement(DECLARBODY, "RXXXXG105_2S")
+    RXXXXG105_2S.set("ROWNUM", row)
+    RXXXXG105_2S.text = "3011"
+
+    RXXXXG5 = ET.SubElement(DECLARBODY, "RXXXXG5")
+    RXXXXG5.set("ROWNUM", row)
+    RXXXXG5.text = qnt
+
+    RXXXXG6 = ET.SubElement(DECLARBODY, "RXXXXG6")
+    RXXXXG6.set("ROWNUM", row)
+    RXXXXG6.text = price
+
+    RXXXXG008 = ET.SubElement(DECLARBODY, "RXXXXG008")
+    RXXXXG008.set("ROWNUM", row)
+    RXXXXG008.text = "20"
+
+    RXXXXG009 = ET.SubElement(DECLARBODY, "RXXXXG009")
+    RXXXXG009.set("ROWNUM", row)
+    RXXXXG009.set("xsi:nil", "true")
+
+    #RXXXXG010 = ET.SubElement(DECLARBODY, "RXXXXG010")
+    #RXXXXG010.set("ROWNUM", row)
+    #RXXXXG010
+
+    #RXXXXG11_10 = ET.SubElement(DECLARBODY, "RXXXXG11_10")
+    #RXXXXG11_10.set("ROWNUM", row)
+    #RXXXXG11_10
+    
+    RXXXXG011 = ET.SubElement(DECLARBODY, "RXXXXG011")
+    RXXXXG011.set("ROWNUM", row)
+    RXXXXG011.set("xsi:nil", "true")
+
 
 def generate_ending(DECLARBODY, hbos, hkbos):
     ET.SubElement(DECLARBODY, "HBOS").text = hbos
     ET.SubElement(DECLARBODY, "HKBOS").text = hkbos
     ET.SubElement(DECLARBODY, "R003G10S").set("xsi:nil", "true")
+
 
 def generate_xml(root):
     tree = ET.ElementTree(root)
