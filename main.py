@@ -31,6 +31,7 @@ document_number_cell = "B4"
 
 
 def main():
+    logger.add("logs/{time}.log")
     logger.info("### ПРОГРАМА РОЗПОЧАЛА РОБОТУ ###")
     excel_part()
     #input("Press Enter to continue...")

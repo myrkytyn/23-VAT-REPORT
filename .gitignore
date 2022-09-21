@@ -12,3 +12,4 @@ excel_files_generated/
 xml_files_generated/
 build/
 dist/
+logs/
