@@ -7,7 +7,7 @@ import os
 from loguru import logger
 from xml_generation import generate_xml, generate_root, generate_head, generate_body, generate_b_part, generate_ending
 from json_info import get_info_xlsx, get_info_xml
-from excel import put_hnum, non_excise_groups_formulas, non_excise_dishes_formulas, list_excels, unmerge_cells, remove_rows_total, remove_rows_zero_price, add_formulas, get_date, get_dir_name
+from excel import put_hnum, non_excise_groups_formulas, change_column_width, non_excise_dishes_formulas, list_excels, unmerge_cells, remove_rows_total, remove_rows_zero_price, add_formulas, get_date, get_dir_name
 
 excel_source_path = "./iiko_reports/"
 excel_target_path = "./excel_files_generated/"
@@ -35,7 +35,7 @@ def main():
     logger.info("### ПРОГРАМА РОЗПОЧАЛА РОБОТУ ###")
     excel_part()
     #input("Press Enter to continue...")
-    # xml_part()
+    #xml_part()
     logger.info("### ПРОГРАМА ЗАКІНЧИЛА РОБОТУ ###")
     input("Мені видається, що все пройшло добре. Натисни Enter для виходу")
 
@@ -81,13 +81,14 @@ def excel_part():
                          sum_without_vat_col, price_col, sum_col, quantity_col, uktzed_col)
             iiko_name, non_excise_dishes, non_excise_groups = get_info_xlsx(
                 ws, restaurant_cell, config)
-            non_excise_dishes_formulas(ws, non_excise_dishes)
-            non_excise_groups_formulas(ws, non_excise_groups)
+            non_excise_dishes_formulas(ws, non_excise_dishes, sum_col, sum_without_excise_col)
+            non_excise_groups_formulas(ws, non_excise_groups, sum_col, sum_without_excise_col)
             put_hnum(ws, document_text_cell, document_number_cell, hnum)
             date = get_date(ws, date_cell)[0]
             rest_dir_name = get_dir_name(
                 ws, restaurant_cell, cooking_place_cell)
             file_name = f"{excel_target_path}{rest_dir_name}/{date}_{iiko_name}.xlsx"
+            change_column_width(ws, sum_without_excise_col,sum_without_vat_col,price_col,uktzed_col)
             if not os.path.exists(f"../{excel_target_path}{rest_dir_name}"):
                 os.makedirs(f"../{excel_target_path}{rest_dir_name}")
             try:
