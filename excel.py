@@ -48,16 +48,15 @@ def add_formulas(ws, sum_without_excise_col, sum_without_vat_col, price_col, sum
             # Find price without excise
             sum_without_excise_fl = round(
                 float(ws[f"{sum_col}{cell.row}"].value)/105*100, 2)
-            ws[f"{sum_without_excise_col}{cell.row}"] = str(
-                sum_without_excise_fl)
+            ws[f"{sum_without_excise_col}{cell.row}"] = sum_without_excise_fl
             total_without_excise += sum_without_excise_fl
             # Find price without VAT
             sum_without_vat_fl = round((float(ws[f"{sum_without_excise_col}{cell.row}"].value)/6*5), 2)
-            ws[f"{sum_without_vat_col}{cell.row}"] = str(sum_without_vat_fl)
+            ws[f"{sum_without_vat_col}{cell.row}"] = sum_without_vat_fl
             total_without_vat+=sum_without_vat_fl
             # Find price for 1 product
-            ws[f"{price_col}{cell.row}"] = str(round((float(
-                ws[f"{sum_without_vat_col}{cell.row}"].value)/float(ws[f"{quantity_col}{cell.row}"].value)), 2))
+            ws[f"{price_col}{cell.row}"] = round((float(
+                ws[f"{sum_without_vat_col}{cell.row}"].value)/float(ws[f"{quantity_col}{cell.row}"].value)), 2)
     ws[f"{sum_without_excise_col}{ws.max_row+1}"] = total_without_excise
     ws[f"{sum_without_vat_col}{ws.max_row}"] = total_without_vat
 
