@@ -40,8 +40,6 @@ def add_formulas(ws, sum_without_excise_col, sum_without_vat_col, price_col, sum
     ws[f"{price_col}5"] = "Ціна без ПДВ"
     ws[f"{uktzed_col}5"] = "Код УКТЗЕД"
 
-    total_without_excise = 0
-    total_without_vat = 0
     # Start from 6
     for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row):
         for cell in row:
@@ -49,16 +47,13 @@ def add_formulas(ws, sum_without_excise_col, sum_without_vat_col, price_col, sum
             sum_without_excise_fl = round(
                 float(ws[f"{sum_col}{cell.row}"].value)/105*100, 2)
             ws[f"{sum_without_excise_col}{cell.row}"] = sum_without_excise_fl
-            total_without_excise += sum_without_excise_fl
             # Find price without VAT
-            sum_without_vat_fl = round((float(ws[f"{sum_without_excise_col}{cell.row}"].value)/6*5), 2)
+            sum_without_vat_fl = round(
+                (float(ws[f"{sum_without_excise_col}{cell.row}"].value)/6*5), 2)
             ws[f"{sum_without_vat_col}{cell.row}"] = sum_without_vat_fl
-            total_without_vat+=sum_without_vat_fl
             # Find price for 1 product
             ws[f"{price_col}{cell.row}"] = round((float(
                 ws[f"{sum_without_vat_col}{cell.row}"].value)/float(ws[f"{quantity_col}{cell.row}"].value)), 2)
-    ws[f"{sum_without_excise_col}{ws.max_row+1}"] = total_without_excise
-    ws[f"{sum_without_vat_col}{ws.max_row}"] = total_without_vat
 
 
 def non_excise_dishes_formulas(ws, non_excise_dishes, sum_col, sum_without_excise_col):
@@ -79,7 +74,7 @@ def non_excise_groups_formulas(ws, non_excise_groups, sum_col, sum_without_excis
             counter_dishes += 1
             i = 1
             while ws[f"C{cell.row+i}"].value == None:
-                ws[f'{sum_without_excise_col}{cell.row+i}'] = ws[f"{sum_col}{cell.row}"].value
+                ws[f'{sum_without_excise_col}{cell.row+i}'] = ws[f"{sum_col}{cell.row+i}"].value
                 counter_dishes += 1
                 i += 1
             counter_groups += 1
@@ -119,3 +114,19 @@ def change_column_width(ws, sum_without_excise_col, sum_without_vat_col, price_c
     ws.column_dimensions["G"].width = 8
     ws.column_dimensions["H"].width = 8
     ws.column_dimensions["I"].width = 8
+
+
+def get_total(ws, sum_without_excise_col, sum_without_vat_col, sum_col):
+    total_sum = 0
+    total_without_excise = 0
+    total_without_vat = 0
+    max_row = ws.max_row
+    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row):
+        for cell in row:
+                total_without_vat += ws[f"{sum_without_vat_col}{cell.row}"].value
+                total_without_excise += ws[f"{sum_without_excise_col}{cell.row}"].value
+                total_sum += ws[f"{sum_col}{cell.row}"].value
+    ws[f"F{max_row+1}"] = "Сума"
+    ws[f"{sum_without_excise_col}{max_row+1}"] = total_without_excise
+    ws[f"{sum_without_vat_col}{max_row+1}"] = total_without_vat
+    ws[f"{sum_col}{max_row+1}"] = total_sum

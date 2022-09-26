@@ -7,7 +7,8 @@ import os
 from loguru import logger
 from xml_generation import generate_xml, generate_root, generate_head, generate_body, generate_b_part, generate_ending
 from json_info import get_info_xlsx, get_info_xml
-from excel import put_hnum, non_excise_groups_formulas, change_column_width, non_excise_dishes_formulas, list_excels, unmerge_cells, remove_rows_total, remove_rows_zero_price, add_formulas, get_date, get_dir_name
+import excel as ex
+#put_hnum, non_excise_groups_formulas, change_column_width, non_excise_dishes_formulas, list_excels, unmerge_cells, remove_rows_total, remove_rows_zero_price, add_formulas, get_date, get_dir_name
 
 excel_source_path = "./iiko_reports/"
 excel_target_path = "./excel_files_generated/"
@@ -58,7 +59,7 @@ def excel_part():
     # Get all files from directory
     logger.info("### ОБРОБКУ ЗВІТІВ З ФАЙЛІВ ЕКСЕЛЬ РОЗПОЧАТО ###")
     try:
-        excel_source_file = list_excels(excel_source_path)
+        excel_source_file = ex.list_excels(excel_source_path)
     except Exception as e:
         logger.error(
             f"Помилка, шлях {excel_source_path} не знайдено. Поточна директорія - {os.getcwd()}")
@@ -74,21 +75,22 @@ def excel_part():
                 logger.error(e)
                 return
             ws = wb.active
-            unmerge_cells(ws)
-            remove_rows_total(ws, cooking_place_col, dishes_group_col)
-            remove_rows_zero_price(ws, sum_col)
-            add_formulas(ws, sum_without_excise_col,
+            ex.unmerge_cells(ws)
+            ex.remove_rows_total(ws, cooking_place_col, dishes_group_col)
+            ex.remove_rows_zero_price(ws, sum_col)
+            ex.add_formulas(ws, sum_without_excise_col,
                          sum_without_vat_col, price_col, sum_col, quantity_col, uktzed_col)
             iiko_name, non_excise_dishes, non_excise_groups = get_info_xlsx(
                 ws, restaurant_cell, config)
-            non_excise_dishes_formulas(ws, non_excise_dishes, sum_col, sum_without_excise_col)
-            non_excise_groups_formulas(ws, non_excise_groups, sum_col, sum_without_excise_col)
-            put_hnum(ws, document_text_cell, document_number_cell, hnum)
-            date = get_date(ws, date_cell)[0]
-            rest_dir_name = get_dir_name(
+            ex.non_excise_dishes_formulas(ws, non_excise_dishes, sum_col, sum_without_excise_col)
+            ex.non_excise_groups_formulas(ws, non_excise_groups, sum_col, sum_without_excise_col)
+            ex.put_hnum(ws, document_text_cell, document_number_cell, hnum)
+            date = ex.get_date(ws, date_cell)[0]
+            rest_dir_name = ex.get_dir_name(
                 ws, restaurant_cell, cooking_place_cell)
             file_name = f"{excel_target_path}{rest_dir_name}/{date}_{iiko_name}.xlsx"
-            change_column_width(ws, sum_without_excise_col,sum_without_vat_col,price_col,uktzed_col)
+            ex.change_column_width(ws, sum_without_excise_col,sum_without_vat_col,price_col,uktzed_col)
+            ex.get_total(ws, sum_without_excise_col, sum_without_vat_col, sum_col)
             if not os.path.exists(f"../{excel_target_path}{rest_dir_name}"):
                 os.makedirs(f"../{excel_target_path}{rest_dir_name}")
             try:
@@ -108,7 +110,7 @@ def xml_part():
     os.chdir("..")
     # For all target excels. Working with XML
     try:
-        excel_target_file = list_excels(excel_target_path)
+        excel_target_file = ex.list_excels(excel_target_path)
     except Exception as e:
         logger.error(
             f"Помилка, щлях {excel_target_path} не знайдено. Поточна директорія - {os.getcwd()}")
@@ -120,7 +122,7 @@ def xml_part():
             ws = wb.active
             iiko_name, hnamesel, tin, hksel, htinsel, hbos, hkbos = get_info_xml(
                 ws, restaurant_cell, config)
-            date, year, month = get_date(ws, date_cell)
+            date, year, month = ex.get_date(ws, date_cell)
             root = generate_root()
             generate_head(root, tin, period_month=month,
                           period_year=year, d_fill=date)
