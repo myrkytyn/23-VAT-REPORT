@@ -75,16 +75,25 @@ def excel_part():
                 logger.error(e)
                 return
             ws = wb.active
+            #1 - unmerge cells
             ex.unmerge_cells(ws)
+            #2 - remove unused rows
             ex.remove_rows_total(ws, cooking_place_col, dishes_group_col)
             ex.remove_rows_zero_price(ws, sum_col)
-            ex.add_formulas(ws, sum_without_excise_col,
-                         sum_without_vat_col, price_col, sum_col, quantity_col, uktzed_col)
+            #3 - calculate without excise fromm all dishes
+            ex.without_excise(ws, sum_without_excise_col, sum_col)
+            #4 - 
             iiko_name, non_excise_dishes, non_excise_groups = get_info_xlsx(
                 ws, restaurant_cell, config)
+            #5 - check and recalculate excise
             ex.non_excise_dishes_formulas(ws, non_excise_dishes, sum_col, sum_without_excise_col)
             ex.non_excise_groups_formulas(ws, non_excise_groups, sum_col, sum_without_excise_col)
+            #6 - put number of document
             ex.put_hnum(ws, document_text_cell, document_number_cell, hnum)
+            #7 - calculate without VAT
+            ex.without_vat(ws,sum_without_vat_col,sum_without_excise_col)
+            #8 - calculate final price
+            ex.price(ws, price_col,sum_without_vat_col,quantity_col)
             date = ex.get_date(ws, date_cell)[0]
             rest_dir_name = ex.get_dir_name(
                 ws, restaurant_cell, cooking_place_cell)

@@ -34,11 +34,8 @@ def remove_rows_zero_price(ws, sum_col):
             ws.delete_rows(cell.row)
 
 
-def add_formulas(ws, sum_without_excise_col, sum_without_vat_col, price_col, sum_col, quantity_col, uktzed_col):
+def without_excise(ws, sum_without_excise_col, sum_col):
     ws[f"{sum_without_excise_col}5"] = "Сума без акцизу"
-    ws[f"{sum_without_vat_col}5"] = "Сума без ПДВ"
-    ws[f"{price_col}5"] = "Ціна без ПДВ"
-    ws[f"{uktzed_col}5"] = "Код УКТЗЕД"
 
     # Start from 6
     for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row):
@@ -47,13 +44,27 @@ def add_formulas(ws, sum_without_excise_col, sum_without_vat_col, price_col, sum
             sum_without_excise_fl = round(
                 float(ws[f"{sum_col}{cell.row}"].value)/105*100, 2)
             ws[f"{sum_without_excise_col}{cell.row}"] = sum_without_excise_fl
+
+def without_vat(ws,sum_without_vat_col,sum_without_excise_col):
+    ws[f"{sum_without_vat_col}5"] = "Сума без ПДВ"
+    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row):
+        for cell in row:
             # Find price without VAT
             sum_without_vat_fl = round(
                 (float(ws[f"{sum_without_excise_col}{cell.row}"].value)/6*5), 2)
             ws[f"{sum_without_vat_col}{cell.row}"] = sum_without_vat_fl
+
+def price(ws, price_col,sum_without_vat_col,quantity_col):
+    ws[f"{price_col}5"] = "Ціна без ПДВ"
+    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row):
+        for cell in row:
             # Find price for 1 product
             ws[f"{price_col}{cell.row}"] = round((float(
                 ws[f"{sum_without_vat_col}{cell.row}"].value)/float(ws[f"{quantity_col}{cell.row}"].value)), 2)
+
+
+def uktzed(ws, uktzed_col):
+    ws[f"{uktzed_col}5"] = "Код УКТЗЕД"
 
 
 def non_excise_dishes_formulas(ws, non_excise_dishes, sum_col, sum_without_excise_col):
@@ -110,10 +121,10 @@ def change_column_width(ws, sum_without_excise_col, sum_without_vat_col, price_c
     ws.column_dimensions[sum_without_vat_col].width = 10
     ws.column_dimensions[price_col].width = 10
     ws.column_dimensions[uktzed_col].width = 20
-    ws.column_dimensions["F"].width = 8
-    ws.column_dimensions["G"].width = 8
-    ws.column_dimensions["H"].width = 8
-    ws.column_dimensions["I"].width = 8
+    ws.column_dimensions["F"].width = 10
+    ws.column_dimensions["G"].width = 10
+    ws.column_dimensions["H"].width = 10
+    ws.column_dimensions["I"].width = 10
 
 
 def get_total(ws, sum_without_excise_col, sum_without_vat_col, sum_col):
