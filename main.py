@@ -8,7 +8,8 @@ from loguru import logger
 from xml_generation import generate_xml, generate_root, generate_head, generate_body, generate_b_part, generate_ending
 from json_info import get_info_xlsx, get_info_xml
 import excel as ex
-#put_hnum, non_excise_groups_formulas, change_column_width, non_excise_dishes_formulas, list_excels, unmerge_cells, remove_rows_total, remove_rows_zero_price, add_formulas, get_date, get_dir_name
+import get_database as gdb
+
 
 excel_source_path = "./iiko_reports/"
 excel_target_path = "./excel_files_generated/"
@@ -21,12 +22,15 @@ cooking_place_cell = "B6"
 dishes_group_col = "C"
 dishes_col = "D"
 units_col = "E"
-quantity_col = "F"
-sum_col = "G"
-sum_without_excise_col = "J"
-sum_without_vat_col = "K"
-price_col = "L"
-uktzed_col = "M"
+dish_code_col = "F"
+quantity_col = "G"
+sum_col = "H"
+cost_col = "I"
+percent_col = "J"
+sum_without_excise_col = "L"
+sum_without_vat_col = "M"
+price_col = "N"
+uktzed_col = "O"
 document_text_cell = "A4"
 document_number_cell = "B4"
 
@@ -36,7 +40,7 @@ def main():
     logger.info("### ПРОГРАМА РОЗПОЧАЛА РОБОТУ ###")
     excel_part()
     #input("Press Enter to continue...")
-    #xml_part()
+    # xml_part()
     logger.info("### ПРОГРАМА ЗАКІНЧИЛА РОБОТУ ###")
     input("Мені видається, що все пройшло добре. Натисни Enter для виходу")
 
@@ -75,31 +79,42 @@ def excel_part():
                 logger.error(e)
                 return
             ws = wb.active
-            #1 - unmerge cells
+            # 1 - unmerge cells
             ex.unmerge_cells(ws)
-            #2 - remove unused rows
+            # clear columns
+            ex.clear_cols(ws, cost_col, percent_col)
+            # 2 - remove unused rows
             ex.remove_rows_total(ws, cooking_place_col, dishes_group_col)
             ex.remove_rows_zero_price(ws, sum_col)
-            #3 - calculate without excise fromm all dishes
+            # 3 - calculate without excise fromm all dishes
             ex.without_excise(ws, sum_without_excise_col, sum_col)
-            #4 - 
-            iiko_name, non_excise_dishes, non_excise_groups = get_info_xlsx(
+            # 4 -
+            iiko_name, non_excise_dishes, non_excise_groups, db_name = get_info_xlsx(
                 ws, restaurant_cell, config)
-            #5 - check and recalculate excise
-            ex.non_excise_dishes_formulas(ws, non_excise_dishes, sum_col, sum_without_excise_col)
-            ex.non_excise_groups_formulas(ws, non_excise_groups, sum_col, sum_without_excise_col)
-            #6 - put number of document
+            # UKTZED
+            dish_codes = ex.get_dish_codes(ws, dish_code_col)
+            uktzed_codes = gdb.get_uktzed(dish_codes, db_name)
+            if uktzed_codes != "None":
+                ex.uktzed(ws, uktzed_col, uktzed_codes, dishes_col)
+            # 5 - check and recalculate excise
+            ex.non_excise_dishes_formulas(
+                ws, non_excise_dishes, sum_col, sum_without_excise_col)
+            ex.non_excise_groups_formulas(
+                ws, non_excise_groups, sum_col, sum_without_excise_col)
+            # 6 - put number of document
             ex.put_hnum(ws, document_text_cell, document_number_cell, hnum)
-            #7 - calculate without VAT
-            ex.without_vat(ws,sum_without_vat_col,sum_without_excise_col)
-            #8 - calculate final price
-            ex.price(ws, price_col,sum_without_vat_col,quantity_col)
+            # 7 - calculate without VAT
+            ex.without_vat(ws, sum_without_vat_col, sum_without_excise_col)
+            # 8 - calculate final price
+            ex.price(ws, price_col, sum_without_vat_col, quantity_col)
             date = ex.get_date(ws, date_cell)[0]
             rest_dir_name = ex.get_dir_name(
                 ws, restaurant_cell, cooking_place_cell)
             file_name = f"{excel_target_path}{rest_dir_name}/{date}_{iiko_name}.xlsx"
-            ex.change_column_width(ws, sum_without_excise_col,sum_without_vat_col,price_col,uktzed_col)
-            ex.get_total(ws, sum_without_excise_col, sum_without_vat_col, sum_col)
+            ex.change_column_width(
+                ws, sum_without_excise_col, sum_without_vat_col, price_col, uktzed_col)
+            ex.get_total(ws, sum_without_excise_col,
+                         sum_without_vat_col, sum_col)
             if not os.path.exists(f"../{excel_target_path}{rest_dir_name}"):
                 os.makedirs(f"../{excel_target_path}{rest_dir_name}")
             try:
