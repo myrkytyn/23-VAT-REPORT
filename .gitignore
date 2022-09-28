@@ -14,3 +14,4 @@ build/
 dist/
 logs/
 get_database.py
+main.spec
