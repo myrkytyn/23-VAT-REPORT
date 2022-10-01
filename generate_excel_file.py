@@ -13,7 +13,7 @@ from datetime import datetime
 
 
 def main():
-    time = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+    time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     logger.add(f"logs/excel-{time}.log")
     logger.info("### ПРОГРАМА РОЗПОЧАЛА РОБОТУ ###")
     excel_part()
