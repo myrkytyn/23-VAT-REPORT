@@ -17,10 +17,14 @@ def main():
     logger.info("### ПРОГРАМА РОЗПОЧАЛА РОБОТУ ###")
     xml_part()
     logger.info("### ПРОГРАМА ЗАКІНЧИЛА РОБОТУ ###")
-    if "ERROR" in open(f"../logs/xml-{time}.log", "r").read():
-        input("При виконанні програми були помилочки. Перевір чи все гаразд \nНатисни Enter для виходу")
-    else:
-        input("Мені видається, що все пройшло добре. Натисни Enter для виходу")
+    try:
+        if "ERROR" in open(f"../logs/xml-{time}.log", "r").read():
+            input("При виконанні програми були помилочки. Перевір чи все гаразд \nНатисни Enter для виходу")
+        else:
+            input("Мені видається, що все пройшло добре. Натисни Enter для виходу")
+    except Exception as e:
+        logger.warning("Не вдалося перевірити чи були помилки при виконанні.")
+        input("Натисни Enter для виходу")
 
 
 def xml_part():
