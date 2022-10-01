@@ -12,8 +12,8 @@ units_col = "E"
 
 
 def main():
-    time = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-    logger.add(f"logs/xml-{time}.log")
+    time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    logger.add(filename=f"logs/xml-{time}.log", filemode='w')
     logger.info("### ПРОГРАМА РОЗПОЧАЛА РОБОТУ ###")
     xml_part()
     logger.info("### ПРОГРАМА ЗАКІНЧИЛА РОБОТУ ###")
