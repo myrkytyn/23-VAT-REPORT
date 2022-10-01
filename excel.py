@@ -65,12 +65,12 @@ def price(ws, price_col, sum_without_vat_col, quantity_col):
                 ws[f"{sum_without_vat_col}{cell.row}"].value)/float(ws[f"{quantity_col}{cell.row}"].value)), 2)
 
 
-def uktzed(ws, uktzed_col, uktzed_codes, dishes_col):
+def uktzed(ws, uktzed_col, uktzed_codes, dish_code_col):
     ws[f"{uktzed_col}5"] = "Код УКТЗЕД"
     for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row):
         for cell in row:
             for r in uktzed_codes:
-                if ws[f"{dishes_col}{cell.row}"].value == r[0]:
+                if ws[f"{dish_code_col}{cell.row}"].value == r[0]:
                     ws[f"{uktzed_col}{cell.row}"] = r[1]
 
 

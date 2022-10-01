@@ -13,5 +13,4 @@ xml_files_generated/
 build/
 dist/
 logs/
-get_database.py
 main.spec

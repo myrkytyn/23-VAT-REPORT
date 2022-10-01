@@ -66,14 +66,14 @@ def generate_body(root, hfill, hnamesel, hksel, htinsel):
     return DECLARBODY
 
 
-def generate_b_part(DECLARBODY, dish, row, qnt, price):
+def generate_b_part(DECLARBODY, dish, row, qnt, price, uktzed):
     RXXXXG3S = ET.SubElement(DECLARBODY, "RXXXXG3S")
     RXXXXG3S.text = dish
     RXXXXG3S.set("ROWNUM", row)
 
-    #RXXXXG4=ET.SubElement(DECLARBODY, "RXXXXG4")
-    #RXXXXG4.text = zed
-    #RXXXXG4.set("ROWNUM", row)
+    RXXXXG4=ET.SubElement(DECLARBODY, "RXXXXG4")
+    RXXXXG4.text = uktzed
+    RXXXXG4.set("ROWNUM", row)
 
     RXXXXG32 = ET.SubElement(DECLARBODY, "RXXXXG32")
     RXXXXG32.set("ROWNUM", row)
@@ -109,12 +109,12 @@ def generate_b_part(DECLARBODY, dish, row, qnt, price):
 
     #RXXXXG010 = ET.SubElement(DECLARBODY, "RXXXXG010")
     #RXXXXG010.set("ROWNUM", row)
-    #RXXXXG010
+    # RXXXXG010
 
     #RXXXXG11_10 = ET.SubElement(DECLARBODY, "RXXXXG11_10")
     #RXXXXG11_10.set("ROWNUM", row)
-    #RXXXXG11_10
-    
+    # RXXXXG11_10
+
     RXXXXG011 = ET.SubElement(DECLARBODY, "RXXXXG011")
     RXXXXG011.set("ROWNUM", row)
     RXXXXG011.set("xsi:nil", "true")

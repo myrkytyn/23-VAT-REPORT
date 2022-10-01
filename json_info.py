@@ -30,3 +30,18 @@ def get_info_xml(ws, restaurant_cell, config):
     else:
         logger.error(
             f"{ws[restaurant_cell].value} не існує в файлі JSON. Будь ласка, перевір!")
+
+
+def get_info_db(config, place):
+    if place == "lan":
+        SERVER = config["db_info"]["SERVER_lan"]
+    elif place == "wan":
+        SERVER = config["db_info"]["SERVER_lan"]
+    elif place == "iiko":
+        SERVER = config["db_info"]["SERVER_iiko"]
+    else:
+        logger.error(
+            f"Передано невірне значення для сервера баз даних - {place}")
+    UID = config["db_info"]["UID"]
+    PASSWORD = config["db_info"]["PASSWORD"]
+    return SERVER, UID, PASSWORD
