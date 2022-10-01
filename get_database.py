@@ -9,9 +9,9 @@ def get_uktzed(string_dishes, DATABASE, config, place):
     try:    
             conn = db.connect(f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVER};UID={UID};PWD={PASSWORD};DATABASE={DATABASE}")
     except Exception as e:
-        logger.warning(
+        logger.error(
             "Не можу з'єднатися з базою даних :(")
-        logger.warning(e)
+        logger.error(e)
         return "None"
     cursor = conn.cursor()
     try:

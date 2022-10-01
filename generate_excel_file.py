@@ -20,12 +20,14 @@ def main():
     logger.info("### ПРОГРАМА ЗАКІНЧИЛА РОБОТУ ###")
     try:
         if "ERROR" in open(f"../logs/excel-{time}.log", "r").read():
-            input("При виконанні програми були помилочки. Перевір чи все гаразд \nНатисни Enter для виходу")
+            input(
+                "При виконанні програми були помилочки. Перевір чи все гаразд \nНатисни Enter для виходу")
         else:
             input("Мені видається, що все пройшло добре. Натисни Enter для виходу")
     except Exception as e:
         logger.warning("Не вдалося перевірити чи були помилки при виконанні.")
         input("Натисни Enter для виходу")
+
 
 def excel_part():
     # Work with config.json
@@ -63,27 +65,32 @@ def excel_part():
             ws = wb.active
             # 1 - unmerge cells
             ex.unmerge_cells(ws)
+            # remove delivery rows
+            ex.remove_delivery(ws, var.payment_type_col)
             # clear columns
             ex.clear_cols(ws, var.cost_col, var.percent_col)
             # 2 - remove unused rows
             ex.remove_rows_total(ws, var.cooking_place_col,
                                  var.dishes_group_col)
             ex.remove_rows_zero_price(ws, var.sum_col)
+            # add values
+            ex.add_values(ws, var.dish_code_col, var.quantity_col, var.sum_col)
             # 3 - calculate without excise fromm all dishes
             ex.without_excise(ws, var.sum_without_excise_col, var.sum_col)
             # 4 -
             iiko_name, non_excise_dishes, non_excise_groups, db_name = get_info_xlsx(
                 ws, var.restaurant_cell, config)
             # UKTZED
-            dish_codes = ex.get_dish_codes(ws, var.dish_code_col)
-            uktzed_codes = gdb.get_uktzed(dish_codes, db_name, config, var.place)
-            if uktzed_codes != "None":
-                ex.uktzed(ws, var.uktzed_col, uktzed_codes, var.dish_code_col)
+            #dish_codes = ex.get_dish_codes(ws, var.dish_code_col)
+            #uktzed_codes = gdb.get_uktzed(
+            #    dish_codes, db_name, config, var.place)
+            #if uktzed_codes != "None":
+            #    ex.uktzed(ws, var.uktzed_col, uktzed_codes, var.dish_code_col)
             # 5 - check and recalculate excise
             ex.non_excise_dishes_formulas(
-                ws, non_excise_dishes, var.sum_col, var.sum_without_excise_col)
-            ex.non_excise_groups_formulas(
-                ws, non_excise_groups, var.sum_col, var.sum_without_excise_col)
+                ws, non_excise_dishes, var.sum_col, var.sum_without_excise_col, var.dishes_col)
+            #ex.non_excise_groups_formulas(
+            #    ws, non_excise_groups, var.sum_col, var.sum_without_excise_col, var.dishes_group_col)
             # 6 - put number of document
             ex.put_hnum(ws, var.document_text_cell,
                         var.document_number_cell, hnum)

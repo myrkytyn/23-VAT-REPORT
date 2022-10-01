@@ -1,6 +1,7 @@
 from loguru import logger
 import os
 import re
+import openpyxl
 
 
 def list_excels(excel_path):
@@ -13,6 +14,47 @@ def list_excels(excel_path):
 def unmerge_cells(ws):
     for merge in list(ws.merged_cells):
         ws.unmerge_cells(range_string=str(merge))
+
+
+def remove_delivery(ws, payment_type_col):
+    for cell in ws[payment_type_col]:
+        if cell.value == "Доставка":
+            logger.info("Доставку знайдено. Видалення рядків запущено")
+            i = 1
+            while ws[f"{payment_type_col}{cell.row+i}"].value == None:
+                i += 1
+            ws.delete_rows(cell.row, cell.row+i)
+            logger.info(
+                f"Видалено рядки з доставкою - {cell.row}:{cell.row+i}")
+    for cell in ws[payment_type_col]:
+        if cell.value is not None:
+            if "Total" in cell.value or "всего" in cell.value:
+                ws.delete_rows(cell.row)
+    ws.delete_cols(
+        openpyxl.utils.cell.column_index_from_string(payment_type_col))
+    logger.info("Стовпець з типом оплат видалено")
+
+
+def add_values(ws, dish_code_col, quantity_col, sum_col):
+    rows_to_remove = []
+    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row):
+        for cell in row:
+            for next_row in ws.iter_rows(min_col=4, max_col=4, min_row=cell.row+1, max_row=ws.max_row):
+                for cell1 in next_row:
+                    if ws[f"{dish_code_col}{cell.row}"].value == ws[f"{dish_code_col}{cell1.row}"].value:
+                        ws[f"{quantity_col}{cell.row}"] = ws[f"{quantity_col}{cell.row}"].value + \
+                            ws[f"{quantity_col}{cell1.row}"].value
+                        ws[f"{sum_col}{cell.row}"] = ws[f"{sum_col}{cell.row}"].value + \
+                            ws[f"{sum_col}{cell1.row}"].value
+                        rows_to_remove.append(cell1.row)
+    rows_to_remove.sort()
+    rows_to_remove = list(dict.fromkeys(rows_to_remove))
+    i=0
+    for row_to_remove in rows_to_remove:
+        print(row_to_remove)
+        print(ws[f"D{row_to_remove-i}"].value)
+        ws.delete_rows(row_to_remove-i)
+        i+=1
 
 
 def remove_rows_total(ws, cooking_place_col, dishes_group_col):
@@ -74,19 +116,19 @@ def uktzed(ws, uktzed_col, uktzed_codes, dish_code_col):
                     ws[f"{uktzed_col}{cell.row}"] = r[1]
 
 
-def non_excise_dishes_formulas(ws, non_excise_dishes, sum_col, sum_without_excise_col):
+def non_excise_dishes_formulas(ws, non_excise_dishes, sum_col, sum_without_excise_col, dishes_col):
     counter = 0
-    for cell in ws['D']:
+    for cell in ws[dishes_col]:
         if cell.value in non_excise_dishes:
             ws[f"{sum_without_excise_col}{cell.row}"] = ws[f"{sum_col}{cell.row}"].value
             counter += 1
     logger.info(f"Акциз видалено з {counter} страв")
 
 
-def non_excise_groups_formulas(ws, non_excise_groups, sum_col, sum_without_excise_col):
+def non_excise_groups_formulas(ws, non_excise_groups, sum_col, sum_without_excise_col, dishes_group_col):
     counter_groups = 0
     counter_dishes = 0
-    for cell in ws['C']:
+    for cell in ws[dishes_group_col]:
         if cell.value in non_excise_groups:
             ws[f'{sum_without_excise_col}{cell.row}'] = ws[f"{sum_col}{cell.row}"].value
             counter_dishes += 1
