@@ -88,7 +88,7 @@ def without_excise(ws, sum_without_excise_col, sum_col):
 
 def without_vat(ws, sum_without_vat_col, sum_without_excise_col):
     ws[f"{sum_without_vat_col}5"] = "Сума без ПДВ"
-    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row):
+    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row-1):
         for cell in row:
             # Find price without VAT
             sum_without_vat_fl = round(
@@ -98,7 +98,7 @@ def without_vat(ws, sum_without_vat_col, sum_without_excise_col):
 
 def price(ws, price_col, sum_without_vat_col, quantity_col):
     ws[f"{price_col}5"] = "Ціна без ПДВ"
-    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row):
+    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row-1):
         for cell in row:
             # Find price for 1 product
             ws[f"{price_col}{cell.row}"] = round((float(
@@ -107,7 +107,7 @@ def price(ws, price_col, sum_without_vat_col, quantity_col):
 
 def uktzed(ws, uktzed_col, uktzed_codes, dish_code_col):
     ws[f"{uktzed_col}5"] = "Код УКТЗЕД"
-    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row):
+    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row-1):
         for cell in row:
             for r in uktzed_codes:
                 if ws[f"{dish_code_col}{cell.row}"].value == r[0]:
@@ -179,15 +179,14 @@ def get_total(ws, sum_without_excise_col, sum_without_vat_col, sum_col):
     total_without_excise = 0
     total_without_vat = 0
     max_row = ws.max_row
-    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row):
+    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row-1):
         for cell in row:
             total_without_vat += ws[f"{sum_without_vat_col}{cell.row}"].value
             total_without_excise += ws[f"{sum_without_excise_col}{cell.row}"].value
             total_sum += ws[f"{sum_col}{cell.row}"].value
-    ws[f"F{max_row+1}"] = "Сума"
-    ws[f"{sum_without_excise_col}{max_row+1}"] = total_without_excise
-    ws[f"{sum_without_vat_col}{max_row+1}"] = total_without_vat
-    ws[f"{sum_col}{max_row+1}"] = total_sum
+    ws[f"{sum_without_excise_col}{max_row}"] = total_without_excise
+    ws[f"{sum_without_vat_col}{max_row}"] = total_without_vat
+    ws[f"{sum_col}{max_row}"] = total_sum
 
 
 def get_dish_codes(ws, dish_code_col):

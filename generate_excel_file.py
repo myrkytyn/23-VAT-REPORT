@@ -64,15 +64,35 @@ def excel_part():
                 return
             ws = wb.active
             # 1 - unmerge cells
-            ex.unmerge_cells(ws)
+            try:
+                ex.unmerge_cells(ws)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі роз'єднання клітинок")
+                logger.error(e)
             # remove delivery rows
-            ex.remove_delivery(ws, var.payment_type_col)
+            try:
+                ex.remove_delivery(ws, var.payment_type_col)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі видалення доставки")
+                logger.error(e)
             # clear columns
-            ex.clear_cols(ws, var.cost_col, var.percent_col)
+            try:
+                ex.clear_cols(ws, var.cost_col, var.percent_col)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі очищення непотрібних стовпців")
+                logger.error(e)
             # 2 - remove unused rows
-            ex.remove_rows_total(ws, var.cooking_place_col,
-                                 var.dishes_group_col)
-            ex.remove_rows_zero_price(ws, var.sum_col)
+            try:
+                ex.remove_rows_total(ws, var.cooking_place_col,
+                                     var.dishes_group_col)
+                ex.remove_rows_zero_price(ws, var.sum_col)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі очищення непотрібних рядків")
+                logger.error(e)
             # add values
             try:
                 ex.add_values(ws, var.dish_code_col, var.quantity_col, var.sum_col)
@@ -88,22 +108,43 @@ def excel_part():
                     f"Помилка у модулі видалення акцизу")
                 logger.error(e)
             # 4 -
-            iiko_name, non_excise_dishes, non_excise_groups, db_name = get_info_xlsx(
-                ws, var.restaurant_cell, config)
+            try:
+                iiko_name, non_excise_dishes, non_excise_groups, db_name = get_info_xlsx(
+                    ws, var.restaurant_cell, config)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі присвєння значень на базі JSON")
+                logger.error(e)
             # UKTZED
-            dish_codes = ex.get_dish_codes(ws, var.dish_code_col)
-            uktzed_codes = gdb.get_uktzed(
-                dish_codes, db_name, config, var.place)
-            if uktzed_codes != "None":
-                ex.uktzed(ws, var.uktzed_col, uktzed_codes, var.dish_code_col)
+            try:
+                dish_codes = ex.get_dish_codes(ws, var.dish_code_col)
+                uktzed_codes = gdb.get_uktzed(
+                    dish_codes, db_name, config, var.place)
+                if uktzed_codes != "None":
+                    ex.uktzed(ws, var.uktzed_col, uktzed_codes, var.dish_code_col)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі обробки кодів УКТЗЕД")
+                logger.error(e)
             # 5 - check and recalculate excise
-            ex.non_excise_dishes_formulas(
-                ws, non_excise_dishes, var.sum_col, var.sum_without_excise_col, var.dishes_col)
-            #ex.non_excise_groups_formulas(
-            #    ws, non_excise_groups, var.sum_col, var.sum_without_excise_col, var.dishes_group_col)
+            ws[f"{var.dishes_group_col}{ws.max_row+1}"] = "Сума"
+            try:
+                ex.non_excise_dishes_formulas(
+                    ws, non_excise_dishes, var.sum_col, var.sum_without_excise_col, var.dishes_col)
+                ex.non_excise_groups_formulas(
+                    ws, non_excise_groups, var.sum_col, var.sum_without_excise_col, var.dishes_group_col)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі заміни ціни в безакцизних групах та товарах")
+                logger.error(e)
             # 6 - put number of document
-            ex.put_hnum(ws, var.document_text_cell,
-                        var.document_number_cell, hnum)
+            try:
+                ex.put_hnum(ws, var.document_text_cell,
+                            var.document_number_cell, hnum)
+            except Exception as e:
+                logger.error(
+                    f"Помилка в модулі обрахунку порядкового номера документу")
+                logger.error(e)
             # 7 - calculate without VAT
             ex.without_vat(ws, var.sum_without_vat_col,
                            var.sum_without_excise_col)
