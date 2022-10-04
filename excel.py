@@ -51,8 +51,6 @@ def add_values(ws, dish_code_col, quantity_col, sum_col):
     rows_to_remove = list(dict.fromkeys(rows_to_remove))
     i=0
     for row_to_remove in rows_to_remove:
-        print(row_to_remove)
-        print(ws[f"D{row_to_remove-i}"].value)
         ws.delete_rows(row_to_remove-i)
         i+=1
 

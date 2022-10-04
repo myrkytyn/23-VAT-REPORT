@@ -13,4 +13,4 @@ xml_files_generated/
 build/
 dist/
 logs/
-main.spec
+*.spec

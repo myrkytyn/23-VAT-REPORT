@@ -74,18 +74,28 @@ def excel_part():
                                  var.dishes_group_col)
             ex.remove_rows_zero_price(ws, var.sum_col)
             # add values
-            ex.add_values(ws, var.dish_code_col, var.quantity_col, var.sum_col)
+            try:
+                ex.add_values(ws, var.dish_code_col, var.quantity_col, var.sum_col)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі сумування страв")
+                logger.error(e)
             # 3 - calculate without excise fromm all dishes
-            ex.without_excise(ws, var.sum_without_excise_col, var.sum_col)
+            try:
+                ex.without_excise(ws, var.sum_without_excise_col, var.sum_col)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі видалення акцизу")
+                logger.error(e)
             # 4 -
             iiko_name, non_excise_dishes, non_excise_groups, db_name = get_info_xlsx(
                 ws, var.restaurant_cell, config)
             # UKTZED
-            #dish_codes = ex.get_dish_codes(ws, var.dish_code_col)
-            #uktzed_codes = gdb.get_uktzed(
-            #    dish_codes, db_name, config, var.place)
-            #if uktzed_codes != "None":
-            #    ex.uktzed(ws, var.uktzed_col, uktzed_codes, var.dish_code_col)
+            dish_codes = ex.get_dish_codes(ws, var.dish_code_col)
+            uktzed_codes = gdb.get_uktzed(
+                dish_codes, db_name, config, var.place)
+            if uktzed_codes != "None":
+                ex.uktzed(ws, var.uktzed_col, uktzed_codes, var.dish_code_col)
             # 5 - check and recalculate excise
             ex.non_excise_dishes_formulas(
                 ws, non_excise_dishes, var.sum_col, var.sum_without_excise_col, var.dishes_col)
