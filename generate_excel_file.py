@@ -16,6 +16,7 @@ def main():
     time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     logger.add(f"logs/excel-{time}.log")
     logger.info("### ПРОГРАМА РОЗПОЧАЛА РОБОТУ ###")
+    logger.info(f"Версія програми {var.version}")
     excel_part()
     logger.info("### ПРОГРАМА ЗАКІНЧИЛА РОБОТУ ###")
     try:
@@ -30,12 +31,13 @@ def main():
 
 
 def excel_part():
-    # Work with config.json
+    # Document number input
     hnum = input("Введи номер, з якого почати нумерувати податкові накладні: ")
     while hnum.isdigit() == False:
         hnum = input(
             "От дідько :( Щось пішло не так\nВведи номер, з якого почати нумерувати податкові накладні: ")
     hnum = int(hnum)
+    # Opening config.json
     try:
         global config
         config = json.load(open("config.json", "r", encoding="utf-8"))
@@ -53,80 +55,96 @@ def excel_part():
             f"Помилка, шлях {var.excel_source_path} не знайдено. Поточна директорія - {os.getcwd()}")
         logger.error(e)
         return
-    for i in range(0, len(excel_source_file)):
-        if excel_source_file[i].endswith(".xlsx"):
+    # For all files in directory
+    for file in range(0, len(excel_source_file)):
+        if excel_source_file[file].endswith(".xlsx"):
+            # Opening Excel File
             try:
-                wb = openpyxl.load_workbook(excel_source_file[i])
+                wb = openpyxl.load_workbook(excel_source_file[file])
+                logger.info(
+                    f"\n \n Працюю з файлом {excel_source_file[file]} \n \n")
             except Exception as e:
                 logger.error(
-                    f"Помилка відкривання файлу {excel_source_file[i]}")
+                    f"Помилка відкривання файлу {excel_source_file[file]}")
                 logger.error(e)
                 return
             ws = wb.active
-            # 1 - unmerge cells
+            restaurant = ws[var.restaurant_cell].value
+            cooking_place = ws[var.cooking_place_cell].value
+
+            # Unmerge cells
             try:
                 ex.unmerge_cells(ws)
             except Exception as e:
                 logger.error(
                     f"Помилка у модулі роз'єднання клітинок")
                 logger.error(e)
-            # remove delivery rows
+                return
+            # Remove delivery rows
             try:
                 ex.remove_delivery(ws, var.payment_type_col)
             except Exception as e:
                 logger.error(
                     f"Помилка у модулі видалення доставки")
                 logger.error(e)
-            # clear columns
+                return
+            # Clear columns
             try:
                 ex.clear_cols(ws, var.cost_col, var.percent_col)
             except Exception as e:
                 logger.error(
                     f"Помилка у модулі очищення непотрібних стовпців")
                 logger.error(e)
-            # 2 - remove unused rows
+                return
+            # Remove unused rows
             try:
                 ex.remove_rows_total(ws, var.cooking_place_col,
                                      var.dishes_group_col)
-                ex.remove_rows_zero_price(ws, var.sum_col)
             except Exception as e:
                 logger.error(
-                    f"Помилка у модулі очищення непотрібних рядків")
+                    f"Помилка у модулі очищення рядків cум")
                 logger.error(e)
-            # add values
+                return
+            # Sum dish values
             try:
-                ex.add_values(ws, var.dish_code_col, var.quantity_col, var.sum_col)
+                ex.add_values(ws, var.dish_code_col,
+                              var.quantity_col, var.sum_col)
             except Exception as e:
                 logger.error(
                     f"Помилка у модулі сумування страв")
                 logger.error(e)
-            # 3 - calculate without excise fromm all dishes
+                return
+            # Calculate without excise from all dishes
             try:
                 ex.without_excise(ws, var.sum_without_excise_col, var.sum_col)
             except Exception as e:
                 logger.error(
                     f"Помилка у модулі видалення акцизу")
                 logger.error(e)
-            # 4 -
+                return
+            # Get info from JSON file
             try:
                 iiko_name, non_excise_dishes, non_excise_groups, db_name = get_info_xlsx(
-                    ws, var.restaurant_cell, config)
+                    restaurant, config)
             except Exception as e:
                 logger.error(
                     f"Помилка у модулі присвєння значень на базі JSON")
                 logger.error(e)
-            # UKTZED
+                return
+            # Get UKTZED and put it to excel
             try:
                 dish_codes = ex.get_dish_codes(ws, var.dish_code_col)
                 uktzed_codes = gdb.get_uktzed(
                     dish_codes, db_name, config, var.place)
                 if uktzed_codes != "None":
-                    ex.uktzed(ws, var.uktzed_col, uktzed_codes, var.dish_code_col)
+                    ex.uktzed(ws, var.uktzed_col,
+                              uktzed_codes, var.dish_code_col)
             except Exception as e:
                 logger.error(
                     f"Помилка у модулі обробки кодів УКТЗЕД")
                 logger.error(e)
-            # 5 - check and recalculate excise
+                return
+            # Check and recalculate excise
             ws[f"{var.dishes_group_col}{ws.max_row+1}"] = "Сума"
             try:
                 ex.non_excise_dishes_formulas(
@@ -137,7 +155,8 @@ def excel_part():
                 logger.error(
                     f"Помилка у модулі заміни ціни в безакцизних групах та товарах")
                 logger.error(e)
-            # 6 - put number of document
+                return
+            # Put number of document
             try:
                 ex.put_hnum(ws, var.document_text_cell,
                             var.document_number_cell, hnum)
@@ -145,20 +164,69 @@ def excel_part():
                 logger.error(
                     f"Помилка в модулі обрахунку порядкового номера документу")
                 logger.error(e)
-            # 7 - calculate without VAT
-            ex.without_vat(ws, var.sum_without_vat_col,
-                           var.sum_without_excise_col)
-            # 8 - calculate final price
-            ex.price(ws, var.price_col,
-                     var.sum_without_vat_col, var.quantity_col)
-            ex.change_column_width(
-                ws, var.sum_without_excise_col, var.sum_without_vat_col, var.price_col, var.uktzed_col)
-            ex.get_total(ws, var.sum_without_excise_col,
-                         var.sum_without_vat_col, var.sum_col)
-            date = ex.get_date(ws, var.date_cell)[0]
-            rest_dir_name = ex.get_dir_name(
-                ws, var.restaurant_cell, var.cooking_place_cell)
+                return
+            # Calculate without VAT
+            try:
+                ex.without_vat(ws, var.sum_without_vat_col,
+                               var.sum_without_excise_col)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі розрахунку ціни без ПДВ")
+                logger.error(e)
+                return
+            # Calculate final price
+            try:
+                ex.price(ws, var.price_col,
+                         var.sum_without_vat_col, var.quantity_col)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі розрахунку ціни за одиницю без акцизу та ПДВ")
+                logger.error(e)
+                return
+            # Changing Colum width
+            try:
+                ex.change_column_width(
+                    ws, var.sum_without_excise_col, var.sum_without_vat_col, var.price_col, var.uktzed_col)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі зміни ширини стовпців")
+                logger.error(e)
+                return
+            # Get Sum of all columns
+            try:
+                ex.get_total(ws, var.sum_without_excise_col,
+                             var.sum_without_vat_col, var.sum_col)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі розрахунку суми для стовпців")
+                logger.error(e)
+                return
+            # Get Date of report
+            try:
+                date = ex.get_date(ws, var.date_cell)[0]
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі отримання дати за яку створено звіт")
+                logger.error(e)
+                return
+            # Get directory of restaurant
+            try:
+                rest_dir_name = ex.get_dir_name(restaurant, cooking_place)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі отримання назви директорії для збереження звіту")
+                logger.error(e)
+                return
             file_name = f"{var.excel_target_path}{rest_dir_name}/{date}_{iiko_name}.xlsx"
+            try:
+                ex.remove_rows_zero_price(ws, var.sum_col)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі очищення рядків з нульовою ціною")
+                logger.error(e)
+                return                
+            ws[var.new_restaurant_cell]=restaurant
+
             if not os.path.exists(f"../{var.excel_target_path}{rest_dir_name}"):
                 os.makedirs(f"../{var.excel_target_path}{rest_dir_name}")
             try:

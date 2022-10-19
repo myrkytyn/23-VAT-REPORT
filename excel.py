@@ -7,7 +7,6 @@ import openpyxl
 def list_excels(excel_path):
     os.chdir(excel_path)
     excel_files = os.listdir('.')
-    logger.info(f"В директорії {excel_path} є такі файли: \n{excel_files}")
     return excel_files
 
 
@@ -151,10 +150,10 @@ def get_date(ws, date_cell):
     return (date, year, month)
 
 
-def get_dir_name(ws, restaurant_cell, cooking_place_cell):
-    dir_suffix = ws[cooking_place_cell].value
+def get_dir_name(restaurant, cooking_place):
+    dir_suffix = cooking_place
     dir_suffix = dir_suffix[dir_suffix.find('ф'):]
-    dir_name = f"{ws[restaurant_cell].value}-{dir_suffix}"
+    dir_name = f"{restaurant}-{dir_suffix}"
     return dir_name
 
 

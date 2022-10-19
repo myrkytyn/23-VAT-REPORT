@@ -1,8 +1,7 @@
 from loguru import logger
 
 
-def get_info_xlsx(ws, restaurant_cell, config):
-    restaurant = ws[restaurant_cell].value
+def get_info_xlsx(restaurant, config):
     if restaurant in config["legal_entities"]:
         iiko_name = config["legal_entities"][restaurant]["iiko_name"]
         non_excise_dishes = config["legal_entities"][restaurant]["non_excise_dishes"]
@@ -13,7 +12,7 @@ def get_info_xlsx(ws, restaurant_cell, config):
         return (iiko_name, non_excise_dishes, non_excise_groups, db_name)
     else:
         logger.error(
-            f"{ws[restaurant_cell].value} не існує в файлі JSON. Будь ласка, перевір!")
+            f"{restaurant} не існує в файлі JSON. Будь ласка, перевір!")
 
 
 def get_info_xml(ws, restaurant_cell, config):
