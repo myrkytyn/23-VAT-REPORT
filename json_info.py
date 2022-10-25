@@ -44,3 +44,8 @@ def get_info_db(config, place):
     UID = config["db_info"]["UID"]
     PASSWORD = config["db_info"]["PASSWORD"]
     return SERVER, UID, PASSWORD
+
+def get_info_api(config):
+    username = config["api_info"]["iiko_username"]
+    password = config["api_info"]["iiko_password"]
+    return username, password
