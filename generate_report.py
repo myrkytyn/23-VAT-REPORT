@@ -23,14 +23,12 @@ def main():
         logger.error(
             "Схоже, що конфігураційного файлу не існує. Будь ласка. перевір!")
         logger.error(e)
-        return
     try:
         username, password = prop.get_info_api(config)
     except Exception as e:
         logger.error(
             "Схоже, що в конфігураційному файлі немає потрібних полів")
         logger.error(e)
-        return
 
     restaurants = get_restaurants(restaurants)
     data = questions(restaurants)
@@ -52,7 +50,6 @@ def main():
         logger.error(
             "В модулі підрахунку днів щось пішло не так")
         logger.error(e)
-        return
     session = requests.Session()
     try:
         auth(session, port, username, password)
@@ -61,7 +58,6 @@ def main():
         logger.error(
             "В модулі авторизації щось пішло не так")
         logger.error(e)
-        return
 
     for day in range(delta.days+1):
         date = (start_date + timedelta(days=day)).strftime("%d.%m.%Y")
@@ -72,14 +68,12 @@ def main():
             logger.error(
                 "В модулі завантаження звітів щось пішло не так")
             logger.error(e)
-            return
         try:
             excel_creation(restaurant, date, response.text)
         except Exception as e:
             logger.error(
                 "В модулі створення Ексель звіту щось пішло не так")
             logger.error(e)
-            return
     input("Натисни Enter для виходу")
 
 
