@@ -2,6 +2,7 @@ excel_source_path = "./iiko_reports/"
 excel_target_path = "./excel_files_generated/"
 xml_target_path = "./xml_files_generated/"
 
+report_name = "A1"
 date_cell = "A3"
 restaurant_cell = "A6"
 cooking_place_col = "B"
