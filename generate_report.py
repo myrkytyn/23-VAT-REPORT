@@ -14,67 +14,69 @@ import variables as var
 
 
 def main():
-    restaurants = []
-    headers = {"Accept-Language": "uk,en-US;q=0.7,en;q=0.3"}
     try:
-        global config
-        config = json.load(open("config.json", "r", encoding="utf-8"))
-    except Exception as e:
-        logger.error(
-            "Схоже, що конфігураційного файлу не існує. Будь ласка. перевір!")
-        logger.error(e)
-    try:
-        username, password = prop.get_info_api(config)
-    except Exception as e:
-        logger.error(
-            "Схоже, що в конфігураційному файлі немає потрібних полів")
-        logger.error(e)
-
-    restaurants = get_restaurants(restaurants)
-    data = questions(restaurants)
-    restaurant, start_date, end_date = data_processing(data)
-
-    #######
-    if restaurant == "Урбан Спейс":
-        logger.error(
-            "Вибач, для Урбан Спейс поки що не працює ;(")
-        input("Натисни Enter для виходу")
-        return
-    #######
-
-    port, preset_id = set_variables(restaurant)
-    try:
-        delta = end_date - start_date
-        logger.info(f"Буде скачано звіти за {delta.days+1} днів")
-    except Exception as e:
-        logger.error(
-            "В модулі підрахунку днів щось пішло не так")
-        logger.error(e)
-    session = requests.Session()
-    try:
-        auth(session, port, username, password)
-        logger.info("Авторизація пройшла успішно")
-    except Exception as e:
-        logger.error(
-            "В модулі авторизації щось пішло не так")
-        logger.error(e)
-
-    for day in range(delta.days+1):
-        date = (start_date + timedelta(days=day)).strftime("%d.%m.%Y")
-        try: 
-            response = generate_reports(
-                session, date, preset_id, headers)
+        restaurants = []
+        headers = {"Accept-Language": "uk,en-US;q=0.7,en;q=0.3"}
+        try:
+            global config
+            config = json.load(open("config.json", "r", encoding="utf-8"))
         except Exception as e:
             logger.error(
-                "В модулі завантаження звітів щось пішло не так")
+                "Схоже, що конфігураційного файлу не існує. Будь ласка. перевір!")
             logger.error(e)
         try:
-            excel_creation(restaurant, date, response.text)
+            username, password = prop.get_info_api(config)
         except Exception as e:
             logger.error(
-                "В модулі створення Ексель звіту щось пішло не так")
+                "Схоже, що в конфігураційному файлі немає потрібних полів")
             logger.error(e)
-    input("Натисни Enter для виходу")
+
+        restaurants = get_restaurants(restaurants)
+        data = questions(restaurants)
+        restaurant, start_date, end_date = data_processing(data)
+
+        #######
+        if restaurant == "Урбан Спейс":
+            logger.error(
+                "Вибач, для Урбан Спейс поки що не працює ;(")
+            input("Натисни Enter для виходу")
+            return
+        #######
+
+        port, preset_id = set_variables(restaurant)
+        try:
+            delta = end_date - start_date
+            logger.info(f"Буде скачано звіти за {delta.days+1} днів")
+        except Exception as e:
+            logger.error(
+                "В модулі підрахунку днів щось пішло не так")
+            logger.error(e)
+        session = requests.Session()
+        try:
+            auth(session, port, username, password)
+            logger.info("Авторизація пройшла успішно")
+        except Exception as e:
+            logger.error(
+                "В модулі авторизації щось пішло не так")
+            logger.error(e)
+
+        for day in range(delta.days+1):
+            date = (start_date + timedelta(days=day)).strftime("%d.%m.%Y")
+            try: 
+                response = generate_reports(
+                    session, date, preset_id, headers)
+            except Exception as e:
+                logger.error(
+                    "В модулі завантаження звітів щось пішло не так")
+                logger.error(e)
+            try:
+                excel_creation(restaurant, date, response.text)
+            except Exception as e:
+                logger.error(
+                    "В модулі створення Ексель звіту щось пішло не так")
+                logger.error(e)
+    finally:
+        input("Натисни Enter для виходу")
 
 
 def get_restaurants(restaurants):
