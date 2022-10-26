@@ -24,17 +24,75 @@ def main():
             "Схоже, що конфігураційного файлу не існує. Будь ласка. перевір!")
         logger.error(e)
         return
-    username, password = prop.get_info_api(config)
+    try:
+        username, password = prop.get_info_api(config)
+    except Exception as e:
+        logger.error(
+            "Схоже, що в конфігураційному файлі немає потрібних полів")
+        logger.error(e)
+        return
 
+    restaurants = get_restaurants(restaurants)
+    data = questions(restaurants)
+    restaurant, start_date, end_date = data_processing(data)
+
+    #######
+    if restaurant == "Урбан Спейс":
+        logger.error(
+            "Вибач, для Урбан Спейс поки що не працює ;(")
+        input("Натисни Enter для виходу")
+        return
+    #######
+
+    port, preset_id = set_variables(restaurant)
+    try:
+        delta = end_date - start_date
+        logger.info(f"Буде скачано звіти за {delta.days+1} днів")
+    except Exception as e:
+        logger.error(
+            "В модулі підрахунку днів щось пішло не так")
+        logger.error(e)
+        return
+    session = requests.Session()
+    try:
+        auth(session, port, username, password)
+        logger.info("Авторизація пройшла успішно")
+    except Exception as e:
+        logger.error(
+            "В модулі авторизації щось пішло не так")
+        logger.error(e)
+        return
+
+    for day in range(delta.days+1):
+        date = (start_date + timedelta(days=day)).strftime("%d.%m.%Y")
+        try: 
+            response = generate_reports(
+                session, date, preset_id, headers)
+        except Exception as e:
+            logger.error(
+                "В модулі завантаження звітів щось пішло не так")
+            logger.error(e)
+            return
+        try:
+            excel_creation(restaurant, date, response.text)
+        except Exception as e:
+            logger.error(
+                "В модулі створення Ексель звіту щось пішло не так")
+            logger.error(e)
+            return
+    input("Натисни Enter для виходу")
+
+
+def get_restaurants(restaurants):
     for entity in config["legal_entities"]:
         if isinstance(config["legal_entities"][entity]["name"], list):
             restaurants.extend(config["legal_entities"][entity]["name"])
         else:
             restaurants.append(config["legal_entities"][entity]["name"])
+    return restaurants
 
-    data = questions(restaurants)
-    restaurant, start_date, end_date = data_processing(data)
 
+def set_variables(restaurant):
     for entity in config["legal_entities"]:
         if restaurant in config["legal_entities"][entity]["name"]:
             port = config["legal_entities"][entity]["port"]
@@ -44,18 +102,7 @@ def main():
                 preset_id = config["legal_entities"][entity]["preset_id"][1]
             else:
                 preset_id = config["legal_entities"][entity]["preset_id"]
-
-    delta = end_date - start_date
-    session = requests.Session()
-    auth(session, port, username, password)
-    logger.info("Авторизація пройшла успішно")
-
-    for day in range(delta.days+1):
-        date = (start_date + timedelta(days=day)).strftime("%d.%m.%Y")
-        response = generate_reports(
-            session, date, preset_id, headers)
-        excel_creation(restaurant, date, response.text)
-    input("Натисни Enter для виходу")
+    return port, preset_id
 
 
 def auth(session, port, username, password):
