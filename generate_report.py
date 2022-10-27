@@ -62,7 +62,7 @@ def main():
 
         for day in range(delta.days+1):
             date = (start_date + timedelta(days=day)).strftime("%d.%m.%Y")
-            try: 
+            try:
                 response = generate_reports(
                     session, date, preset_id, headers)
             except Exception as e:
@@ -158,6 +158,11 @@ def data_processing(data):
         restaurant = data["restaurant"]
         start_date = datetime.strptime(data["start_date"], '%d.%m.%Y')
         end_date = datetime.strptime(data["end_date"], '%d.%m.%Y')
+        present = datetime.now()
+        if start_date > present or end_date > present:
+            logger.error(
+                "Одна з введених дат ще не була :)")
+            return
         return restaurant, start_date, end_date
     else:
         logger.warning(f"Не вибрано нічого")
@@ -196,6 +201,8 @@ def excel_creation(restaurant, date, xml):
             "Помилка в модулі встановлення ширини стовпців")
         logger.error(e)
         return
+
+    set_formats(ws)
     try:
         if not os.path.exists(f"./{var.excel_source_path}"):
             os.makedirs(f"./{var.excel_source_path}")
@@ -222,6 +229,13 @@ def set_column_width(ws):
                     (dims.get(cell.column_letter, 0), len(str(cell.value))))
     for col, value in dims.items():
         ws.column_dimensions[col].width = value
+
+
+def set_formats(ws):
+    for row in ws.iter_rows(min_row=6, max_row=ws.max_row):
+        for cell in row:
+            ws[f"H{cell.row}"] = float(ws[f"H{cell.row}"].value)
+            ws[f"I{cell.row}"] = float(ws[f"I{cell.row}"].value)
 
 
 if __name__ == "__main__":

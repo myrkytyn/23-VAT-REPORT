@@ -2,6 +2,7 @@ from loguru import logger
 import os
 import re
 import openpyxl
+import variables as var
 
 
 def list_excels(excel_path):
@@ -41,17 +42,17 @@ def add_values(ws, dish_code_col, quantity_col, sum_col):
             for next_row in ws.iter_rows(min_col=4, max_col=4, min_row=cell.row+1, max_row=ws.max_row):
                 for cell1 in next_row:
                     if ws[f"{dish_code_col}{cell.row}"].value == ws[f"{dish_code_col}{cell1.row}"].value:
-                        ws[f"{quantity_col}{cell.row}"] = ws[f"{quantity_col}{cell.row}"].value + \
-                            ws[f"{quantity_col}{cell1.row}"].value
-                        ws[f"{sum_col}{cell.row}"] = ws[f"{sum_col}{cell.row}"].value + \
-                            ws[f"{sum_col}{cell1.row}"].value
+                        ws[f"{quantity_col}{cell.row}"] = float(ws[f"{quantity_col}{cell.row}"].value) + \
+                            float(ws[f"{quantity_col}{cell1.row}"].value)
+                        ws[f"{sum_col}{cell.row}"] = float(ws[f"{sum_col}{cell.row}"].value) + \
+                            float(ws[f"{sum_col}{cell1.row}"].value)
                         rows_to_remove.append(cell1.row)
     rows_to_remove.sort()
     rows_to_remove = list(dict.fromkeys(rows_to_remove))
-    i=0
+    i = 0
     for row_to_remove in rows_to_remove:
         ws.delete_rows(row_to_remove-i)
-        i+=1
+        i += 1
 
 
 def remove_rows_total(ws, cooking_place_col, dishes_group_col):
@@ -70,6 +71,8 @@ def remove_rows_total(ws, cooking_place_col, dishes_group_col):
 def remove_rows_zero_price(ws, sum_col):
     for cell in ws[sum_col]:
         if cell.value == 0:
+            if (ws[f"{var.dishes_group_col}{cell.row}"].value != None and ws[f"{var.dishes_group_col}{cell.row+1}"].value == None):
+                ws[f"{var.dishes_group_col}{cell.row+1}"] = ws[f"{var.dishes_group_col}{cell.row}"].value
             ws.delete_rows(cell.row)
 
 
@@ -180,9 +183,9 @@ def get_total(ws, sum_without_excise_col, sum_without_vat_col, sum_col):
     max_row = ws.max_row
     for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row-1):
         for cell in row:
-            total_without_vat += ws[f"{sum_without_vat_col}{cell.row}"].value
-            total_without_excise += ws[f"{sum_without_excise_col}{cell.row}"].value
-            total_sum += ws[f"{sum_col}{cell.row}"].value
+            total_without_vat += float(ws[f"{sum_without_vat_col}{cell.row}"].value)
+            total_without_excise += float(ws[f"{sum_without_excise_col}{cell.row}"].value)
+            total_sum += float(ws[f"{sum_col}{cell.row}"].value)
     ws[f"{sum_without_excise_col}{max_row}"] = total_without_excise
     ws[f"{sum_without_vat_col}{max_row}"] = total_without_vat
     ws[f"{sum_col}{max_row}"] = total_sum
