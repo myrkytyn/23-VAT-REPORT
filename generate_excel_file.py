@@ -118,7 +118,7 @@ def excel_part():
                 continue
             # remove rows zero price
             try:
-                ex.remove_rows_zero_price(ws, var.sum_col_before_delete)
+                ex.remove_rows_zero_price(ws, var.sum_col)
             except Exception as e:
                 logger.error(
                     f"Помилка у модулі очищення рядків з нульовою ціною")
