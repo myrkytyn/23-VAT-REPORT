@@ -23,7 +23,7 @@ def get_uktzed(string_dishes, DATABASE, config, place):
                        "ON outerEanCode.id = CASE WHEN CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) > 0 THEN "
                        "SUBSTRING( dish.xml, ( CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) + 39 ), ( CHARINDEX( '</outerEconomicActivityNomenclatureCode>', dish.xml ) - CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) - 39 ) ) "
                        "ELSE '61D63FE7-212C-4847-BA32-1563D97E2424' END "
-                       "WHERE dish.type = 'Product' AND dish.deleted = 0 AND "
+                       "WHERE dish.type = 'Product' AND "
                        f"SUBSTRING( dish.xml, (CHARINDEX('<num>', dish.xml) + 5), ( CHARINDEX('</num>', dish.xml) - CHARINDEX('<num>', dish.xml) - 5 ) ) IN ({string_dishes})")
     except Exception as e:
         logger.error(
@@ -55,7 +55,7 @@ def get_item_name(num, DATABASE, config, place):
                        f"JOIN [{DATABASE}].[dbo].[AssemblyChart] recipe ON recipe.product = dish.id "
                        f"JOIN [{DATABASE}].[dbo].[AssemblyChartItem] item ON item.assemblyChart_id = recipe.id "
                        f"JOIN [{DATABASE}].[dbo].[entity] item_name ON item_name.id = item.product "
-                       f"WHERE dish.type = 'Product' AND dish.deleted = 0 "
+                       f"WHERE dish.type = 'Product' "
                        f"AND SUBSTRING(dish.xml, (CHARINDEX('<num>', dish.xml) + 5), (CHARINDEX('</num>', dish.xml) - CHARINDEX('<num>', dish.xml) - 5))='{num}'")
     except Exception as e:
         logger.error(
