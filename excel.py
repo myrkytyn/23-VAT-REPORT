@@ -3,7 +3,8 @@ import os
 import re
 import openpyxl
 import variables as var
-
+from openpyxl.styles import Font
+import get_database as db
 
 def list_excels(excel_path):
     os.chdir(excel_path)
@@ -84,7 +85,7 @@ def without_excise(ws, sum_without_excise_col, sum_col):
         for cell in row:
             # Find price without excise
             sum_without_excise_fl = round(
-                float(ws[f"{sum_col}{cell.row}"].value)/105*100, 2)
+                float(ws[f"{sum_col}{cell.row}"].value)/105*100, 3)
             ws[f"{sum_without_excise_col}{cell.row}"] = sum_without_excise_fl
 
 
@@ -94,7 +95,7 @@ def without_vat(ws, sum_without_vat_col, sum_without_excise_col):
         for cell in row:
             # Find price without VAT
             sum_without_vat_fl = round(
-                (float(ws[f"{sum_without_excise_col}{cell.row}"].value)/6*5), 2)
+                (float(ws[f"{sum_without_excise_col}{cell.row}"].value)/6*5), 3)
             ws[f"{sum_without_vat_col}{cell.row}"] = sum_without_vat_fl
 
 
@@ -104,7 +105,7 @@ def price(ws, price_col, sum_without_vat_col, quantity_col):
         for cell in row:
             # Find price for 1 product
             ws[f"{price_col}{cell.row}"] = round((float(
-                ws[f"{sum_without_vat_col}{cell.row}"].value)/float(ws[f"{quantity_col}{cell.row}"].value)), 2)
+                ws[f"{sum_without_vat_col}{cell.row}"].value)/float(ws[f"{quantity_col}{cell.row}"].value)), 3)
 
 
 def uktzed(ws, uktzed_col, uktzed_codes, dish_code_col):
@@ -165,15 +166,16 @@ def put_hnum(ws, text_cell, num_cell, hnum):
     ws[num_cell] = hnum
 
 
-def change_column_width(ws, sum_without_excise_col, sum_without_vat_col, price_col, uktzed_col):
-    ws.column_dimensions[sum_without_excise_col].width = 10
-    ws.column_dimensions[sum_without_vat_col].width = 10
-    ws.column_dimensions[price_col].width = 10
-    ws.column_dimensions[uktzed_col].width = 20
-    ws.column_dimensions["F"].width = 10
-    ws.column_dimensions["G"].width = 10
-    ws.column_dimensions["H"].width = 10
-    ws.column_dimensions["I"].width = 10
+def change_column_width(ws):
+    dims = {}
+    for row in ws.rows:
+        for cell in row:
+            cell.font = Font(size="9")
+            if cell.value:
+                dims[cell.column_letter] = max(
+                    (dims.get(cell.column_letter, 0), len(str(cell.value))))
+    for col, value in dims.items():
+        ws.column_dimensions[col].width = value
 
 
 def get_total(ws, sum_without_excise_col, sum_without_vat_col, sum_col):
@@ -186,9 +188,9 @@ def get_total(ws, sum_without_excise_col, sum_without_vat_col, sum_col):
             total_without_vat += float(ws[f"{sum_without_vat_col}{cell.row}"].value)
             total_without_excise += float(ws[f"{sum_without_excise_col}{cell.row}"].value)
             total_sum += float(ws[f"{sum_col}{cell.row}"].value)
-    ws[f"{sum_without_excise_col}{max_row}"] = total_without_excise
-    ws[f"{sum_without_vat_col}{max_row}"] = total_without_vat
-    ws[f"{sum_col}{max_row}"] = total_sum
+    ws[f"{sum_without_excise_col}{max_row}"] = round(total_without_excise, 2)
+    ws[f"{sum_without_vat_col}{max_row}"] = round(total_without_vat, 2)
+    ws[f"{sum_col}{max_row}"] = round(total_sum, 2)
 
 
 def get_dish_codes(ws, dish_code_col):
@@ -210,3 +212,17 @@ def clear_cols(ws, col_to_remove1, col_to_remove2):
     for row in ws[f'{col_to_remove2}1:{col_to_remove2}{ws.max_row}']:
         for cell in row:
             cell.value = None
+
+def item_names(ws, groups_to_get_item_names, dish_code_col, dishes_group_col, item_name_col, DATABASE, config, place):
+    ws[f"{item_name_col}5"] = "Назва товару"
+    for cell in ws[dishes_group_col]:
+        if cell.value in groups_to_get_item_names:
+            num = ws[f"{dish_code_col}{cell.row}"].value
+            ws[f'{item_name_col}{cell.row}'] = db.get_item_name(num, DATABASE, config, place)
+            i = 1
+            while ws[f"C{cell.row+i}"].value == None:
+                num = ws[f"{dish_code_col}{cell.row+i}"].value
+                ws[f'{item_name_col}{cell.row+i}'] = db.get_item_name(num, DATABASE, config, place)
+                i += 1
+    logger.info(
+        f"Знайдено товари по стравах")

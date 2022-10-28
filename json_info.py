@@ -7,9 +7,10 @@ def get_info_xlsx(restaurant, config):
         non_excise_dishes = config["legal_entities"][restaurant]["non_excise_dishes"]
         non_excise_groups = config["legal_entities"][restaurant]["non_excise_groups"]
         db_name = config["legal_entities"][restaurant]["db_name"]
+        groups_to_get_item_names = config["legal_entities"][restaurant]["groups_to_get_item_names"]
         logger.info(
             f"В ресторані {iiko_name}: \nбезакцизні страви - {non_excise_dishes} \nбезакцизні групи страв - {non_excise_groups}")
-        return (iiko_name, non_excise_dishes, non_excise_groups, db_name)
+        return (iiko_name, non_excise_dishes, non_excise_groups, db_name, groups_to_get_item_names)
     else:
         logger.error(
             f"{restaurant} не існує в файлі JSON. Будь ласка, перевір!")

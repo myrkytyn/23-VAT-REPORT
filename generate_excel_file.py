@@ -143,7 +143,7 @@ def excel_part():
                 continue
             # Get info from JSON file
             try:
-                iiko_name, non_excise_dishes, non_excise_groups, db_name = get_info_xlsx(
+                iiko_name, non_excise_dishes, non_excise_groups, db_name, groups_to_get_item_names = get_info_xlsx(
                     restaurant, config)
             except Exception as e:
                 logger.error(
@@ -204,14 +204,14 @@ def excel_part():
                 logger.error(e)
                 continue
             # Changing Colum width
-            # try:
-            #    ex.change_column_width(
-            #        ws, var.sum_without_excise_col, var.sum_without_vat_col, var.price_col, var.uktzed_col)
-            # except Exception as e:
-            #    logger.error(
-            #        f"Помилка у модулі зміни ширини стовпців")
-            #    logger.error(e)
-            #    continue
+            try:
+                ex.change_column_width(
+                    ws)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі зміни ширини стовпців")
+                logger.error(e)
+                continue
             # Get Sum of all columns
             try:
                 ex.get_total(ws, var.sum_without_excise_col,
@@ -219,6 +219,16 @@ def excel_part():
             except Exception as e:
                 logger.error(
                     f"Помилка у модулі розрахунку суми для стовпців")
+                logger.error(e)
+                continue
+            # Get item names
+            #################
+            try:
+                if use_db:
+                    ex.item_names(ws, groups_to_get_item_names, var.dish_code_col, var.dishes_group_col, var.item_name_col, db_name, config, var.place)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі визначення назви товару по страві")
                 logger.error(e)
                 continue
             # Get Date of report
