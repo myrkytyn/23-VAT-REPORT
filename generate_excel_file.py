@@ -18,7 +18,7 @@ def main():
     excel_part()
     logger.info("### ПРОГРАМА ЗАКІНЧИЛА РОБОТУ ###")
     try:
-        if "ERROR" in open(f"../logs/excel-{time}.log", "r").read():
+        if "ERROR" in open(f"../logs/excel-{time}.log", "r", encoding='utf-8').read():
             input(
                 "При виконанні програми були помилочки. Перевір чи все гаразд \nНатисни Enter для виходу")
         else:
