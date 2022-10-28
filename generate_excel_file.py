@@ -222,7 +222,6 @@ def excel_part():
                 logger.error(e)
                 continue
             # Get item names
-            #################
             try:
                 if use_db:
                     ex.item_names(ws, groups_to_get_item_names, var.dish_code_col, var.dishes_group_col, var.item_name_col, db_name, config, var.place)
