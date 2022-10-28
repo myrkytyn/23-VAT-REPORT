@@ -24,6 +24,6 @@ document_text_cell = "A4"
 document_number_cell = "B4"
 place = "lan"
 version="2.1.0"
-item_name_col = "N"
+item_name_col = "K"
 
 new_restaurant_cell = "C4"
