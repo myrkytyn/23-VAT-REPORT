@@ -56,7 +56,7 @@ def get_item_name(num, DATABASE, config, place):
                        f"JOIN [{DATABASE}].[dbo].[AssemblyChartItem] item ON item.assemblyChart_id = recipe.id "
                        f"JOIN [{DATABASE}].[dbo].[entity] item_name ON item_name.id = item.product "
                        f"WHERE dish.type = 'Product' AND dish.deleted = 0 "
-                       f"AND SUBSTRING(dish.xml, (CHARINDEX('<num>', dish.xml) + 5), (CHARINDEX('</num>', dish.xml) - CHARINDEX('<num>', dish.xml) - 5))={num}")
+                       f"AND SUBSTRING(dish.xml, (CHARINDEX('<num>', dish.xml) + 5), (CHARINDEX('</num>', dish.xml) - CHARINDEX('<num>', dish.xml) - 5))='{num}'")
     except Exception as e:
         logger.error(
             "При виконанні запиту щось пішло не так")
@@ -66,4 +66,4 @@ def get_item_name(num, DATABASE, config, place):
     cursor.close()
     conn.close()
     logger.info(f"Роботу з базою даних завершено успішно!")
-    return item_name
+    return item_name[0][0]
