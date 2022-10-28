@@ -4,6 +4,7 @@ import re
 import openpyxl
 import variables as var
 from openpyxl.styles import Font
+from openpyxl.utils import column_index_from_string
 import get_database as db
 
 def list_excels(excel_path):
@@ -70,11 +71,20 @@ def remove_rows_total(ws, cooking_place_col, dishes_group_col):
 
 
 def remove_rows_zero_price(ws, sum_col):
-    for cell in ws[sum_col]:
-        if cell.value == 0:
-            if (ws[f"{var.dishes_group_col}{cell.row}"].value != None and ws[f"{var.dishes_group_col}{cell.row+1}"].value == None):
-                ws[f"{var.dishes_group_col}{cell.row+1}"] = ws[f"{var.dishes_group_col}{cell.row}"].value
-            ws.delete_rows(cell.row)
+    num_col=column_index_from_string(sum_col)
+    rows_to_remove=[]
+    for row in ws.iter_rows(min_col=num_col, max_col=num_col, min_row=6, max_row=ws.max_row):
+        for cell in row:
+            if cell.value == 0 or cell.value == "0":
+                if (ws[f"{var.dishes_group_col}{cell.row}"].value != None and ws[f"{var.dishes_group_col}{cell.row+1}"].value == None and cell.row+1 < ws.max_row):
+                    ws[f"{var.dishes_group_col}{cell.row+1}"] = ws[f"{var.dishes_group_col}{cell.row}"].value
+                rows_to_remove.append(cell.row)
+    rows_to_remove.sort()
+    rows_to_remove = list(dict.fromkeys(rows_to_remove))
+    i = 0
+    for row_to_remove in rows_to_remove:
+        ws.delete_rows(row_to_remove-i)
+        i += 1
 
 
 def without_excise(ws, sum_without_excise_col, sum_col):
