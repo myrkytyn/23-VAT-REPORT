@@ -89,9 +89,7 @@ def remove_rows_zero_price(ws, sum_col):
 
 def without_excise(ws, sum_without_excise_col, sum_col):
     ws[f"{sum_without_excise_col}5"] = "Сума без акцизу"
-
-    # Start from 6
-    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row):
+    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row-1):
         for cell in row:
             # Find price without excise
             sum_without_excise_fl = round(
@@ -101,7 +99,7 @@ def without_excise(ws, sum_without_excise_col, sum_col):
 
 def without_vat(ws, sum_without_vat_col, sum_without_excise_col):
     ws[f"{sum_without_vat_col}5"] = "Сума без ПДВ"
-    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row-1):
+    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row-2):
         for cell in row:
             # Find price without VAT
             sum_without_vat_fl = round(
@@ -111,7 +109,7 @@ def without_vat(ws, sum_without_vat_col, sum_without_excise_col):
 
 def price(ws, price_col, sum_without_vat_col, quantity_col):
     ws[f"{price_col}5"] = "Ціна без ПДВ"
-    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row-1):
+    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row-2):
         for cell in row:
             # Find price for 1 product
             ws[f"{price_col}{cell.row}"] = round((float(
@@ -193,7 +191,7 @@ def get_total(ws, sum_without_excise_col, sum_without_vat_col, sum_col):
     total_without_excise = 0
     total_without_vat = 0
     max_row = ws.max_row
-    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row-1):
+    for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row-2):
         for cell in row:
             total_without_vat += float(ws[f"{sum_without_vat_col}{cell.row}"].value)
             total_without_excise += float(ws[f"{sum_without_excise_col}{cell.row}"].value)
