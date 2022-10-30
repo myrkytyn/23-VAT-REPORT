@@ -39,7 +39,6 @@ def get_uktzed(string_dishes, DATABASE, config, place):
 
 def get_item_name(num, DATABASE, config, place):
     SERVER, UID, PASSWORD = json.get_info_db(config, place)
-    logger.info(f"Розпочинаю роботу з базою даних. Треба трохи зачекати")
     try:
         conn = db.connect(
             f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVER};UID={UID};PWD={PASSWORD};DATABASE={DATABASE}")
@@ -65,5 +64,4 @@ def get_item_name(num, DATABASE, config, place):
     item_name = cursor.fetchall()
     cursor.close()
     conn.close()
-    logger.info(f"Роботу з базою даних завершено успішно!")
     return item_name[0][0]
