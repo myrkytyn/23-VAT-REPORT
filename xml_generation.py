@@ -10,7 +10,7 @@ def generate_root():
     return root
 
 
-def generate_head(root, tin, period_month, period_year, d_fill):
+def generate_head(root, tin, period_month, period_year, d_fill, hnum):
     DECLARHEAD = ET.Element("DECLARHEAD")
     root.append(DECLARHEAD)
     ET.SubElement(DECLARHEAD, "TIN").text = tin
@@ -18,7 +18,7 @@ def generate_head(root, tin, period_month, period_year, d_fill):
     ET.SubElement(DECLARHEAD, "C_DOC_SUB").text = "010"
     ET.SubElement(DECLARHEAD, "C_DOC_VER").text = "13"
     ET.SubElement(DECLARHEAD, "C_DOC_TYPE").text = "0"
-#    ET.SubElement(DECLARHEAD, "C_DOC_CNT").text=c_doc_cnt
+    ET.SubElement(DECLARHEAD, "C_DOC_CNT").text = hnum
     ET.SubElement(DECLARHEAD, "C_REG").text = "9"
     ET.SubElement(DECLARHEAD, "C_RAJ").text = "15"
     ET.SubElement(DECLARHEAD, "PERIOD_MONTH").text = period_month
@@ -31,7 +31,7 @@ def generate_head(root, tin, period_month, period_year, d_fill):
     ET.SubElement(DECLARHEAD, "SOFTWARE").text = "MEDOC"
 
 
-def generate_body(root, hfill, hnamesel, hksel, htinsel):
+def generate_body(root, hfill, hnamesel, hksel, htinsel, hnum, total_without_excise, total_without_vat):
     DECLARBODY = ET.Element("DECLARBODY")
     root.append(DECLARBODY)
     ET.SubElement(DECLARBODY, "R01G1").set("xsi:nil", "true")
@@ -39,7 +39,7 @@ def generate_body(root, hfill, hnamesel, hksel, htinsel):
     ET.SubElement(DECLARBODY, "HORIG1").text = "1"
     ET.SubElement(DECLARBODY, "HTYPR").text = "11"
     ET.SubElement(DECLARBODY, "HFILL").text = hfill
-    ET.SubElement(DECLARBODY, "HNUM").text = "1"
+    ET.SubElement(DECLARBODY, "HNUM").text = hnum
     ET.SubElement(DECLARBODY, "HNUM1").set("xsi:nil", "true")
     ET.SubElement(DECLARBODY, "HNAMESEL").text = hnamesel
     ET.SubElement(DECLARBODY, "HNAMEBUY").text = "Неплатник"
@@ -51,12 +51,12 @@ def generate_body(root, hfill, hnamesel, hksel, htinsel):
     ET.SubElement(DECLARBODY, "HFBUY").set("xsi:nil", "true")
     ET.SubElement(DECLARBODY, "HTINBUY").set("xsi:nil", "true")
     ET.SubElement(DECLARBODY, "HKB").set("xsi:nil", "true")
-#    ET.SubElement(DECLARBODY, "R04G11").text = r04g11
+    ET.SubElement(DECLARBODY, "R04G11").text = total_without_excise
 #    ET.SubElement(DECLARBODY, "R03G11").text = r03g11
 #    ET.SubElement(DECLARBODY, "R03G7").text = r03g7
     ET.SubElement(DECLARBODY, "R03G109").set("xsi:nil", "true")
     ET.SubElement(DECLARBODY, "R03G14").set("xsi:nil", "true")
-#    ET.SubElement(DECLARBODY, "R01G7").text=r01g7
+    ET.SubElement(DECLARBODY, "R01G7").text = total_without_vat
     ET.SubElement(DECLARBODY, "R01G109").set("xsi:nil", "true")
     ET.SubElement(DECLARBODY, "R01G14").set("xsi:nil", "true")
     ET.SubElement(DECLARBODY, "R01G9").set("xsi:nil", "true")
@@ -66,12 +66,12 @@ def generate_body(root, hfill, hnamesel, hksel, htinsel):
     return DECLARBODY
 
 
-def generate_b_part(DECLARBODY, dish, row, qnt, price, uktzed):
+def generate_b_part(DECLARBODY, dish, row, qnt, price, uktzed, unit, unit_code, sum_without_vat, vat_sum):
     RXXXXG3S = ET.SubElement(DECLARBODY, "RXXXXG3S")
     RXXXXG3S.text = dish
     RXXXXG3S.set("ROWNUM", row)
 
-    RXXXXG4=ET.SubElement(DECLARBODY, "RXXXXG4")
+    RXXXXG4 = ET.SubElement(DECLARBODY, "RXXXXG4")
     RXXXXG4.text = uktzed
     RXXXXG4.set("ROWNUM", row)
 
@@ -85,11 +85,11 @@ def generate_b_part(DECLARBODY, dish, row, qnt, price, uktzed):
 
     RXXXXG4S = ET.SubElement(DECLARBODY, "RXXXXG4S")
     RXXXXG4S.set("ROWNUM", row)
-    RXXXXG4S.text = "порц"
+    RXXXXG4S.text = unit
 
     RXXXXG105_2S = ET.SubElement(DECLARBODY, "RXXXXG105_2S")
     RXXXXG105_2S.set("ROWNUM", row)
-    RXXXXG105_2S.text = "3011"
+    RXXXXG105_2S.text = unit_code
 
     RXXXXG5 = ET.SubElement(DECLARBODY, "RXXXXG5")
     RXXXXG5.set("ROWNUM", row)
@@ -107,13 +107,13 @@ def generate_b_part(DECLARBODY, dish, row, qnt, price, uktzed):
     RXXXXG009.set("ROWNUM", row)
     RXXXXG009.set("xsi:nil", "true")
 
-    #RXXXXG010 = ET.SubElement(DECLARBODY, "RXXXXG010")
-    #RXXXXG010.set("ROWNUM", row)
-    # RXXXXG010
+    RXXXXG010 = ET.SubElement(DECLARBODY, "RXXXXG010")
+    RXXXXG010.set("ROWNUM", row)
+    RXXXXG010.text = sum_without_vat
 
-    #RXXXXG11_10 = ET.SubElement(DECLARBODY, "RXXXXG11_10")
-    #RXXXXG11_10.set("ROWNUM", row)
-    # RXXXXG11_10
+    RXXXXG11_10 = ET.SubElement(DECLARBODY, "RXXXXG11_10")
+    RXXXXG11_10.set("ROWNUM", row)
+    RXXXXG11_10.text = vat_sum
 
     RXXXXG011 = ET.SubElement(DECLARBODY, "RXXXXG011")
     RXXXXG011.set("ROWNUM", row)

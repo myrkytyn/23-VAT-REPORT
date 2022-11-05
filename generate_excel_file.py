@@ -203,6 +203,14 @@ def excel_part():
                     f"Помилка у модулі розрахунку ціни за одиницю без акцизу та ПДВ")
                 logger.error(e)
                 continue
+            # Calculate VAT sum
+            try:
+                ex.vat_sum(ws, var.price_col, var.vat_sum_col)
+            except Exception as e:
+                logger.error(
+                    f"Помилка у модулі розрахунку суми ПДВ")
+                logger.error(e)
+                continue
             # Changing Colum width
             try:
                 ex.change_column_width(
