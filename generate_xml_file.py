@@ -67,11 +67,13 @@ def xml_part():
                         ws[f"{var.sum_without_excise_col}{ws.max_row}"].value)
                     total_without_vat = str(
                         ws[f"{var.sum_without_vat_col}{ws.max_row}"].value)
+                    vat_sum = str(
+                        ws[f"{var.vat_sum_col}{ws.max_row}"].value)
                     root = xml.generate_root()
                     xml.generate_head(root, tin, period_month=month,
                                       period_year=year, d_fill=date, hnum=hnum)
                     declarbody = xml.generate_body(root=root, hfill=date, hnamesel=hnamesel, hksel=hksel,
-                                                   htinsel=htinsel, hnum=hnum, total_without_excise=total_without_excise, total_without_vat=total_without_vat)
+                                                   htinsel=htinsel, hnum=hnum, total_without_excise=total_without_excise, total_without_vat=total_without_vat, vat_sum=vat_sum)
                     row_num = 1
                     for row in ws.iter_rows(min_row=6, max_row=ws.max_row-1):
                         cell_row = str(row[0].row)

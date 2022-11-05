@@ -31,7 +31,7 @@ def generate_head(root, tin, period_month, period_year, d_fill, hnum):
     ET.SubElement(DECLARHEAD, "SOFTWARE").text = "MEDOC"
 
 
-def generate_body(root, hfill, hnamesel, hksel, htinsel, hnum, total_without_excise, total_without_vat):
+def generate_body(root, hfill, hnamesel, hksel, htinsel, hnum, total_without_excise, total_without_vat, vat_sum):
     DECLARBODY = ET.Element("DECLARBODY")
     root.append(DECLARBODY)
     ET.SubElement(DECLARBODY, "R01G1").set("xsi:nil", "true")
@@ -52,8 +52,8 @@ def generate_body(root, hfill, hnamesel, hksel, htinsel, hnum, total_without_exc
     ET.SubElement(DECLARBODY, "HTINBUY").set("xsi:nil", "true")
     ET.SubElement(DECLARBODY, "HKB").set("xsi:nil", "true")
     ET.SubElement(DECLARBODY, "R04G11").text = total_without_excise
-#    ET.SubElement(DECLARBODY, "R03G11").text = r03g11
-#    ET.SubElement(DECLARBODY, "R03G7").text = r03g7
+    ET.SubElement(DECLARBODY, "R03G11").text = vat_sum
+    ET.SubElement(DECLARBODY, "R03G7").text = vat_sum
     ET.SubElement(DECLARBODY, "R03G109").set("xsi:nil", "true")
     ET.SubElement(DECLARBODY, "R03G14").set("xsi:nil", "true")
     ET.SubElement(DECLARBODY, "R01G7").text = total_without_vat
