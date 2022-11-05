@@ -18,7 +18,7 @@ def main():
     xml_part()
     logger.info("### ПРОГРАМА ЗАКІНЧИЛА РОБОТУ ###")
     try:
-        if "ERROR" in open(f"../../logs/xml-{time}.log", "r", encoding='utf-8').read():
+        if "ERROR" in open(f"logs/xml-{time}.log", "r", encoding='utf-8').read():
             input(
                 "При виконанні програми були помилочки. Перевір чи все гаразд \nНатисни Enter для виходу")
         else:
@@ -43,8 +43,9 @@ def xml_part():
     # For all target excels. Working with XML
     listdir = os.listdir(f"{var.excel_target_path}")
     for dir in listdir:
-        print(dir)
+        print(dir, os.getcwd())
         if os.path.isdir(f"{var.excel_target_path}/{dir}"):
+            print(os.getcwd())
             logger.info(f"Створюю податкові ннакладні для {dir}")
             try:
                 excel_target_file = ex.list_excels(
@@ -120,6 +121,7 @@ def xml_part():
                         logger.error(e)
                         return
                     logger.info(f"Файл збережено {file_name}")
+            os.chdir("../../")
     logger.info("### XML PART COMPLETED ###")
 
 
