@@ -223,7 +223,7 @@ def excel_part():
             # Get Sum of all columns
             try:
                 ex.get_total(ws, var.sum_without_excise_col,
-                             var.sum_without_vat_col, var.sum_col)
+                             var.sum_without_vat_col, var.sum_col, var.vat_sum_col)
             except Exception as e:
                 logger.error(
                     f"Помилка у модулі розрахунку суми для стовпців")
@@ -232,7 +232,8 @@ def excel_part():
             # Get item names
             try:
                 if use_db:
-                    ex.item_names(ws, groups_to_get_item_names, var.dish_code_col, var.dishes_group_col, var.item_name_col, db_name, config, var.place)
+                    ex.item_names(ws, groups_to_get_item_names, var.dish_code_col,
+                                  var.dishes_group_col, var.item_name_col, db_name, config, var.place)
             except Exception as e:
                 logger.error(
                     f"Помилка у модулі визначення назви товару по страві")
