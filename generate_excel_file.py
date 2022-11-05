@@ -205,7 +205,7 @@ def excel_part():
                 continue
             # Calculate VAT sum
             try:
-                ex.vat_sum(ws, var.price_col, var.vat_sum_col)
+                ex.vat_sum(ws, var.sum_without_vat_col, var.vat_sum_col)
             except Exception as e:
                 logger.error(
                     f"Помилка у модулі розрахунку суми ПДВ")
