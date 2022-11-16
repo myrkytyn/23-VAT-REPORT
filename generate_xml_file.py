@@ -43,10 +43,8 @@ def xml_part():
     # For all target excels. Working with XML
     listdir = os.listdir(f"{var.excel_target_path}")
     for dir in listdir:
-        print(dir, os.getcwd())
         if os.path.isdir(f"{var.excel_target_path}/{dir}"):
-            print(os.getcwd())
-            logger.info(f"Створюю податкові ннакладні для {dir}")
+            logger.info(f"Створюю податкові накладні для {dir}")
             try:
                 excel_target_file = ex.list_excels(
                     f"{var.excel_target_path}/{dir}")

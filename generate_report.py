@@ -36,11 +36,11 @@ def main():
         restaurant, start_date, end_date = data_processing(data)
 
         #######
-        if restaurant == "Урбан Спейс":
-            logger.error(
-                "Вибач, для Урбан Спейс поки що не працює ;(")
-            input("Натисни Enter для виходу")
-            return
+        #if restaurant == "Урбан Спейс":
+        #    logger.error(
+        #        "Вибач, для Урбан Спейс поки що не працює ;(")
+        #    input("Натисни Enter для виходу")
+        #    return
         #######
 
         port, preset_id = set_variables(restaurant)
@@ -73,7 +73,7 @@ def main():
                 excel_creation(restaurant, date, response.text)
             except Exception as e:
                 logger.error(
-                    "В модулі створення Ексель звіту щось пішло не так")
+                    f"В модулі створення Ексель звіту щось пішло не так для {restaurant}")
                 logger.error(e)
     finally:
         input("Натисни Enter для виходу")
