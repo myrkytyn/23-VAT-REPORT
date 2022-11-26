@@ -1,4 +1,15 @@
 from loguru import logger
+import json
+
+
+def get_config():
+    try:
+        config = json.load(open("config.json", "r", encoding="utf-8"))
+        return config
+    except Exception as e:
+        logger.error(
+            "Схоже, що конфігураційного файлу не існує. Будь ласка, перевір!")
+        logger.error(e)
 
 
 def get_info_xlsx(restaurant, config):
@@ -46,7 +57,13 @@ def get_info_db(config, place):
     PASSWORD = config["db_info"]["PASSWORD"]
     return SERVER, UID, PASSWORD
 
+
 def get_info_api(config):
-    username = config["api_info"]["iiko_username"]
-    password = config["api_info"]["iiko_password"]
-    return username, password
+    try:
+        username = config["api_info"]["iiko_username"]
+        password = config["api_info"]["iiko_password"]
+        return username, password
+    except Exception as e:
+        logger.error(
+            "Схоже, що в конфігураційному файлі немає потрібних полів")
+        logger.error(e)

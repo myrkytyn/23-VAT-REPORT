@@ -4,88 +4,78 @@ import os
 import re
 import json_info as prop
 from loguru import logger
-import json
 import inquirer
 import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font
 import xml.etree.ElementTree as ET
 import variables as var
+import argparse
 
 
 def main():
     try:
-        restaurants = []
-        headers = {"Accept-Language": "uk,en-US;q=0.7,en;q=0.3"}
-        try:
-            global config
-            config = json.load(open("config.json", "r", encoding="utf-8"))
-        except Exception as e:
-            logger.error(
-                "Схоже, що конфігураційного файлу не існує. Будь ласка. перевір!")
-            logger.error(e)
-        try:
-            username, password = prop.get_info_api(config)
-        except Exception as e:
-            logger.error(
-                "Схоже, що в конфігураційному файлі немає потрібних полів")
-            logger.error(e)
+        global config
+        config = prop.get_config()
+        start_date, end_date, restaurants, has_args = parse_args()
 
-        restaurants = get_restaurants(restaurants)
-        data = questions(restaurants)
-        restaurant, start_date, end_date = data_processing(data)
-
-        #######
-        #if restaurant == "Урбан Спейс":
-        #    logger.error(
-        #        "Вибач, для Урбан Спейс поки що не працює ;(")
-        #    input("Натисни Enter для виходу")
-        #    return
-        #######
-
-        port, preset_id = set_variables(restaurant)
-        try:
-            delta = end_date - start_date
-            logger.info(f"Буде скачано звіти за {delta.days+1} днів")
-        except Exception as e:
-            logger.error(
-                "В модулі підрахунку днів щось пішло не так")
-            logger.error(e)
+        if has_args == False:
+            restaurants = []
+            restaurants = get_restaurants(restaurants)
+            data = questions(restaurants)
+            restaurants_list, start_date, end_date = data_processing(data)
+        username, password = prop.get_info_api(config)
         session = requests.Session()
-        try:
+        headers = {"Accept-Language": "uk,en-US;q=0.7,en;q=0.3"}
+        delta = end_date - start_date
+        logger.info(f"Буде скачано звіти за {delta.days+1} днів")
+        for restaurant in restaurants_list:
+            port, preset_id = set_variables(restaurant)
             auth(session, port, username, password)
-            logger.info("Авторизація пройшла успішно")
-        except Exception as e:
-            logger.error(
-                "В модулі авторизації щось пішло не так")
-            logger.error(e)
-
-        for day in range(delta.days+1):
-            date = (start_date + timedelta(days=day)).strftime("%d.%m.%Y")
-            try:
+            for day in range(delta.days+1):
+                date = (start_date + timedelta(days=day)).strftime("%d.%m.%Y")
                 response = generate_reports(
                     session, date, preset_id, headers)
-            except Exception as e:
-                logger.error(
-                    "В модулі завантаження звітів щось пішло не так")
-                logger.error(e)
-            try:
-                excel_creation(restaurant, date, response.text)
-            except Exception as e:
-                logger.error(
-                    f"В модулі створення Ексель звіту щось пішло не так для {restaurant}")
-                logger.error(e)
+                #TODO if response has data - excel create report. Else log warning
+                create_excel_report(restaurant, date, response.text)
     finally:
         input("Натисни Enter для виходу")
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-sd', '--start_date')
+    parser.add_argument('-ed', '--end_date')
+    parser.add_argument('-r', '--restaurants')
+
+    args = parser.parse_args()
+    start_date = args.start_date
+    end_date = args.end_date
+    restaurants = args.restaurants
+
+    if start_date == None and end_date == None and restaurants == None:
+        has_args = False
+    elif start_date == None or end_date == None or restaurants == None:
+        logger.error("Передано частину аргументів, щось не так")
+        return
+    else:
+        has_args = True
+
+    return start_date, end_date, restaurants, has_args
+
+
 def get_restaurants(restaurants):
-    for entity in config["legal_entities"]:
-        if isinstance(config["legal_entities"][entity]["name"], list):
-            restaurants.extend(config["legal_entities"][entity]["name"])
-        else:
-            restaurants.append(config["legal_entities"][entity]["name"])
-    return restaurants
+    try:
+        for entity in config["legal_entities"]:
+            if isinstance(config["legal_entities"][entity]["name"], list):
+                restaurants.extend(config["legal_entities"][entity]["name"])
+            else:
+                restaurants.append(config["legal_entities"][entity]["name"])
+        return restaurants
+    except Exception as e:
+        logger.error(
+            f"Схоже, що в конфігураційному файлі немає полів {restaurants}. Будь ласка, перевір!")
+        logger.error(e)
 
 
 def set_variables(restaurant):
@@ -126,19 +116,19 @@ def generate_reports(session, date, preset_id, headers):
             "Помилка в запиті звіту IIKO")
         logger.error(e)
         return
-    if response.status_code not in [200]:
+    if response.status_code not in [200, 302]:
         logger.error(
-            f"Невдала авторизація. Статус код - {response.status_code}")
+            f"Щось пішло не так. Статус код - {response.status_code}")
         return
     return response
 
 
 def questions(restaurants):
     questions = [
-        inquirer.List('restaurant',
-                      message="Для якого ресторану скачати звіти?",
-                      choices=restaurants,
-                      ),
+        inquirer.Checkbox('restaurant',
+                          message="Для якого ресторану скачати звіти?",
+                          choices=restaurants,
+                          ),
         inquirer.Text('start_date', message="З якої дати скачати звіти?",
                       validate=lambda _, x: re.match(
                           "^[0-9]{1,2}\\.[0-9]{1,2}\\.[0-9]{4}$", x),
@@ -153,23 +143,27 @@ def questions(restaurants):
 
 
 def data_processing(data):
-    if data != None:
-        logger.info(f"Вибрано такі дані {data}")
-        restaurant = data["restaurant"]
-        start_date = datetime.strptime(data["start_date"], '%d.%m.%Y')
-        end_date = datetime.strptime(data["end_date"], '%d.%m.%Y')
-        present = datetime.now()
-        if start_date > present or end_date > present:
-            logger.error(
-                "Одна з введених дат ще не була :)")
+    try:
+        if data != None:
+            logger.info(f"Вибрано такі дані {data}")
+            restaurant = data["restaurant"]
+            start_date = datetime.strptime(data["start_date"], '%d.%m.%Y')
+            end_date = datetime.strptime(data["end_date"], '%d.%m.%Y')
+            present = datetime.now()
+            if start_date > present or end_date > present:
+                logger.error(
+                    "Одна з введених дат ще не була :)")
+                return
+            return restaurant, start_date, end_date
+        else:
+            logger.warning(f"Не вибрано нічого")
             return
-        return restaurant, start_date, end_date
-    else:
-        logger.warning(f"Не вибрано нічого")
-        return
+    except Exception as e:
+        logger.error(
+            "В модулі data processing")
+        logger.error(e)
 
-
-def excel_creation(restaurant, date, xml):
+def create_excel_report(restaurant, date, xml):
     wb = openpyxl.Workbook()
     ws = wb.active
 
