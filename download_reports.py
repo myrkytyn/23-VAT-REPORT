@@ -18,7 +18,6 @@ def main():
         global config
         config = prop.get_config()
         start_date, end_date, restaurants, has_args = parse_args()
-
         if has_args == False:
             restaurants = []
             restaurants = get_restaurants(restaurants)
@@ -30,6 +29,7 @@ def main():
         delta = end_date - start_date
         logger.info(f"Буде скачано звіти за {delta.days+1} днів")
         for restaurant in restaurants_list:
+            logger.info(f"Скачую звіти для {restaurant}")
             port, preset_id = set_variables(restaurant)
             auth(session, port, username, password)
             for day in range(delta.days+1):
@@ -38,6 +38,9 @@ def main():
                     session, date, preset_id, headers)
                 #TODO if response has data - excel create report. Else log warning
                 create_excel_report(restaurant, date, response.text)
+    except Exception as e:
+        logger.error("Сталася помилка. Якщо вона не описана вище, то ми її не планували :(")
+        logger.error(e)
     finally:
         input("Натисни Enter для виходу")
 
@@ -57,7 +60,7 @@ def parse_args():
         has_args = False
     elif start_date == None or end_date == None or restaurants == None:
         logger.error("Передано частину аргументів, щось не так")
-        return
+        raise Exception()
     else:
         has_args = True
 
@@ -99,11 +102,12 @@ def auth(session, port, username, password):
         logger.error(
             "Помилка в запиті авторизації")
         logger.error(e)
-        return
+        raise Exception()
+        
     if response.status_code not in [200, 302]:
         logger.error(
             f"Невдала авторизація. Статус код - {response.status_code}")
-        return
+        raise Exception()
     return response
 
 
@@ -115,11 +119,11 @@ def generate_reports(session, date, preset_id, headers):
         logger.error(
             "Помилка в запиті звіту IIKO")
         logger.error(e)
-        return
+        raise Exception()
     if response.status_code not in [200, 302]:
         logger.error(
             f"Щось пішло не так. Статус код - {response.status_code}")
-        return
+        raise Exception()
     return response
 
 
@@ -145,22 +149,21 @@ def questions(restaurants):
 def data_processing(data):
     try:
         if data != None:
+            if data["restaurant"] == []:
+                "Одна з введених дат ще не була :)"
             logger.info(f"Вибрано такі дані {data}")
             restaurant = data["restaurant"]
             start_date = datetime.strptime(data["start_date"], '%d.%m.%Y')
             end_date = datetime.strptime(data["end_date"], '%d.%m.%Y')
             present = datetime.now()
             if start_date > present or end_date > present:
-                logger.error(
-                    "Одна з введених дат ще не була :)")
-                return
+                raise Exception("Одна з введених дат ще не була :)")
             return restaurant, start_date, end_date
         else:
-            logger.warning(f"Не вибрано нічого")
-            return
+            raise Exception("Не вибрано нічого")      
     except Exception as e:
         logger.error(
-            "В модулі data processing")
+            "В модулі обробки введених даних сталася помилка:")
         logger.error(e)
 
 def create_excel_report(restaurant, date, xml):
@@ -194,7 +197,7 @@ def create_excel_report(restaurant, date, xml):
         logger.error(
             "Помилка в модулі встановлення ширини стовпців")
         logger.error(e)
-        return
+        raise Exception()
 
     set_formats(ws)
     try:
@@ -210,7 +213,7 @@ def create_excel_report(restaurant, date, xml):
         logger.error(
             "Помилка збереження файлу")
         logger.error(e)
-        return
+        raise Exception()
 
 
 def set_column_width(ws):
