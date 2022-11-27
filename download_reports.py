@@ -85,10 +85,9 @@ def set_variables(restaurant):
     for entity in config["legal_entities"]:
         if restaurant in config["legal_entities"][entity]["name"]:
             port = config["legal_entities"][entity]["port"]
-            if restaurant == "Фабрика-1":
-                preset_id = config["legal_entities"][entity]["preset_id"][0]
-            elif restaurant == "Фабрика-2":
-                preset_id = config["legal_entities"][entity]["preset_id"][1]
+            if isinstance(config["legal_entities"][entity]["name"], list):
+                position = config["legal_entities"][entity]["name"].index(restaurant)
+                preset_id = config["legal_entities"][entity]["preset_id"][position]
             else:
                 preset_id = config["legal_entities"][entity]["preset_id"]
     return port, preset_id
