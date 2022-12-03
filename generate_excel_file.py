@@ -2,12 +2,13 @@ import json
 import openpyxl
 import os
 from loguru import logger
-from json_info import get_info_xlsx
+import json_info as prop
 import excel as ex
 import get_database as gdb
 import variables as var
 from datetime import datetime
 import inquirer
+import argparse
 
 
 def main():
@@ -15,7 +16,10 @@ def main():
     logger.add(f"logs/excel-{time}.log")
     logger.info("### ПРОГРАМА РОЗПОЧАЛА РОБОТУ ###")
     logger.info(f"Версія програми {var.version}")
-    excel_part()
+    use_db, has_args = parse_args()
+    if not has_args:
+        use_db = questions()
+    excel_part(use_db)
     logger.info("### ПРОГРАМА ЗАКІНЧИЛА РОБОТУ ###")
     try:
         if "ERROR" in open(f"./logs/excel-{time}.log", "r", encoding='utf-8').read():
@@ -29,7 +33,24 @@ def main():
         input("Натисни Enter для виходу")
 
 
-def excel_part():
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-db', '--database')
+
+    args = parser.parse_args()
+    database = args.database
+    if database == None:
+        has_args = False
+    else:
+        has_args = True
+        if database == "True":
+            database = True
+        elif database == "False":
+            database = False
+    return database, has_args
+
+
+def questions():
     questions = [
         inquirer.List('use_db',
                       message="Використовувати базу даних?",
@@ -42,6 +63,10 @@ def excel_part():
         use_db = True
     else:
         use_db = False
+    return use_db
+
+
+def excel_part(use_db):
     # Document number input
     #hnum = input("Введи номер, з якого почати нумерувати податкові накладні: ")
     hnum = "1"
@@ -49,22 +74,12 @@ def excel_part():
         hnum = input(
             "От дідько :( Щось пішло не так\nВведи номер, з якого почати нумерувати податкові накладні: ")
     hnum = int(hnum)
-    # Opening config.json
-    try:
-        global config
-        config = json.load(open("config.json", "r", encoding="utf-8"))
-    except Exception as e:
-        logger.error(
-            "Схоже, що конфігураційного файлу не існує. Будь ласка. перевір!")
-        logger.error(e)
-        return
+    global config
+    config = prop.get_config()
     # For all files in directories
     listdir = os.listdir(f"{var.excel_source_path}")
-    print(listdir)
     for dir in listdir:
-        print(os.getcwd())
         if os.path.isdir(f"{var.excel_source_path}/{dir}"):
-            print(os.getcwd())
             logger.info(f"Створюю Excel ПН для {dir}")
             try:
                 excel_source_file = ex.list_excels(
@@ -75,7 +90,6 @@ def excel_part():
                 logger.error(e)
                 return
             for file in range(0, len(excel_source_file)):
-                print(os.getcwd())
                 if excel_source_file[file].endswith(".xlsx"):
                     # Opening Excel File
                     try:
@@ -89,8 +103,6 @@ def excel_part():
                         return
                     ws = wb.active
                     restaurant = ws[var.restaurant_cell].value
-                    cooking_place = ws[var.cooking_place_cell].value
-
                     # Unmerge cells
                     try:
                         ex.unmerge_cells(ws)
@@ -143,7 +155,8 @@ def excel_part():
                         continue
                     # Calculate without excise from all dishes
                     try:
-                        ex.without_excise(ws, var.sum_without_excise_col, var.sum_col)
+                        ex.without_excise(
+                            ws, var.sum_without_excise_col, var.sum_col)
                     except Exception as e:
                         logger.error(
                             f"Помилка у модулі видалення акцизу")
@@ -151,7 +164,7 @@ def excel_part():
                         continue
                     # Get info from JSON file
                     try:
-                        iiko_name, non_excise_dishes, non_excise_groups, db_name, groups_to_get_item_names = get_info_xlsx(
+                        iiko_name, non_excise_dishes, non_excise_groups, db_name, groups_to_get_item_names = prop.get_info_xlsx(
                             restaurant, config)
                     except Exception as e:
                         logger.error(
@@ -161,7 +174,8 @@ def excel_part():
                     # Get UKTZED and put it to excel
                     try:
                         if use_db:
-                            dish_codes = ex.get_dish_codes(ws, var.dish_code_col)
+                            dish_codes = ex.get_dish_codes(
+                                ws, var.dish_code_col)
                             uktzed_codes = gdb.get_uktzed(
                                 dish_codes, db_name, config, var.place)
                             if uktzed_codes != "None":
@@ -213,7 +227,8 @@ def excel_part():
                         continue
                     # Calculate VAT sum
                     try:
-                        ex.vat_sum(ws, var.sum_without_vat_col, var.vat_sum_col)
+                        ex.vat_sum(ws, var.sum_without_vat_col,
+                                   var.vat_sum_col)
                     except Exception as e:
                         logger.error(
                             f"Помилка у модулі розрахунку суми ПДВ")
@@ -255,19 +270,11 @@ def excel_part():
                             f"Помилка у модулі отримання дати за яку створено звіт")
                         logger.error(e)
                         continue
-                    # Get directory of restaurant
-                    try:
-                        rest_dir_name = ex.get_dir_name(restaurant, cooking_place)
-                    except Exception as e:
-                        logger.error(
-                            f"Помилка у модулі отримання назви директорії для збереження звіту")
-                        logger.error(e)
-                        continue
-                    file_name = f"{var.excel_target_path}{rest_dir_name}/{date}_{iiko_name}.xlsx"
+                    file_name = f"{var.excel_target_path}{dir}/{excel_source_file[file]}"
                     ws[var.new_restaurant_cell] = restaurant
 
-                    if not os.path.exists(f"../../{var.excel_target_path}{rest_dir_name}"):
-                        os.makedirs(f"../../{var.excel_target_path}{rest_dir_name}")
+                    if not os.path.exists(f"../../{var.excel_target_path}{dir}"):
+                        os.makedirs(f"../../{var.excel_target_path}{dir}")
                     try:
                         wb.save(f"../../{file_name}")
                     except Exception as e:
