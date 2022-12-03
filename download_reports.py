@@ -17,7 +17,8 @@ def main():
     try:
         global config
         config = prop.get_config()
-        start_date, end_date, restaurants, has_args = parse_args()
+        start_date, end_date, restaurants_list, has_args = parse_args()
+        print(restaurants_list)
         if has_args == False:
             restaurants = []
             restaurants = get_restaurants(restaurants)
@@ -53,12 +54,12 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-sd', '--start_date')
     parser.add_argument('-ed', '--end_date')
-    parser.add_argument('-r', '--restaurants')
+    parser.add_argument('-r', '--restaurants', type=str, nargs='+')
 
     args = parser.parse_args()
-    start_date = args.start_date
-    end_date = args.end_date
     restaurants = args.restaurants
+    start_date = datetime.strptime(args.start_date, '%d.%m.%Y')
+    end_date = datetime.strptime(args.end_date, '%d.%m.%Y')
 
     if start_date == None and end_date == None and restaurants == None:
         has_args = False
