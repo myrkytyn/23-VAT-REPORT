@@ -58,8 +58,8 @@ def parse_args():
 
     args = parser.parse_args()
     restaurants = args.restaurants
-    start_date = datetime.strptime(args.start_date, '%d.%m.%Y')
-    end_date = datetime.strptime(args.end_date, '%d.%m.%Y')
+    start_date = args.start_date
+    end_date = args.end_date
 
     if start_date == None and end_date == None and restaurants == None:
         has_args = False
@@ -67,6 +67,8 @@ def parse_args():
         logger.error("Передано частину аргументів, щось не так")
         raise Exception()
     else:
+        start_date = datetime.strptime(args.start_date, '%d.%m.%Y')
+        end_date = datetime.strptime(args.end_date, '%d.%m.%Y')
         has_args = True
 
     return start_date, end_date, restaurants, has_args
