@@ -35,11 +35,15 @@ def main():
             for day in range(delta.days+1):
                 date = (start_date + timedelta(days=day)).strftime("%d.%m.%Y")
                 response = generate_reports(
-                    session, date, preset_id, headers)
-                #TODO if response has data - excel create report. Else log warning
-                create_excel_report(restaurant, date, response.text)
+                    session, date, preset_id, headers, port)
+                if len(response.text) < 1000:
+                    logger.warning(
+                        f"Звіт за {date} порожній або щось пішло не так. Перевір, будь ласка.")
+                else:
+                    create_excel_report(restaurant, date, response.text)
     except Exception as e:
-        logger.error("Сталася помилка. Якщо вона не описана вище, то ми її не планували :(")
+        logger.error(
+            "Сталася помилка. Якщо вона не описана вище, то ми її не планували :(")
         logger.error(e)
     finally:
         input("Натисни Enter для виходу")
@@ -86,7 +90,8 @@ def set_variables(restaurant):
         if restaurant in config["legal_entities"][entity]["name"]:
             port = config["legal_entities"][entity]["port"]
             if isinstance(config["legal_entities"][entity]["name"], list):
-                position = config["legal_entities"][entity]["name"].index(restaurant)
+                position = config["legal_entities"][entity]["name"].index(
+                    restaurant)
                 preset_id = config["legal_entities"][entity]["preset_id"][position]
             else:
                 preset_id = config["legal_entities"][entity]["preset_id"]
@@ -102,18 +107,16 @@ def auth(session, port, username, password):
             "Помилка в запиті авторизації")
         logger.error(e)
         raise Exception()
-        
-    if response.status_code not in [200, 302]:
-        logger.error(
-            f"Невдала авторизація. Статус код - {response.status_code}")
+    if "Failed to log in." in response.text:
+        logger.error("Помилка авторизації в iiko")
         raise Exception()
     return response
 
 
-def generate_reports(session, date, preset_id, headers):
+def generate_reports(session, date, preset_id, headers, port):
     try:
         response = session.get(
-            f"http://iiko.23.ua:9080/resto/service/reports/report.jspx?dateFrom={date}&dateTo={date}&presetId={preset_id}", headers=headers)
+            f"http://iiko.23.ua:{port}/resto/service/reports/report.jspx?dateFrom={date}&dateTo={date}&presetId={preset_id}", headers=headers)
     except Exception as e:
         logger.error(
             "Помилка в запиті звіту IIKO")
@@ -149,21 +152,25 @@ def data_processing(data):
     try:
         if data != None:
             if data["restaurant"] == []:
-                "Одна з введених дат ще не була :)"
+                logger.error("Не обрано жодного ресторану")
+                raise Exception()
             logger.info(f"Вибрано такі дані {data}")
             restaurant = data["restaurant"]
             start_date = datetime.strptime(data["start_date"], '%d.%m.%Y')
             end_date = datetime.strptime(data["end_date"], '%d.%m.%Y')
             present = datetime.now()
             if start_date > present or end_date > present:
-                raise Exception("Одна з введених дат ще не була :)")
+                logger.error("Одна з введених дат ще не була :)")
+                raise Exception()
             return restaurant, start_date, end_date
         else:
-            raise Exception("Не вибрано нічого")      
+            logger.error("Не вибрано нічого")
+            raise Exception()
     except Exception as e:
         logger.error(
             "В модулі обробки введених даних сталася помилка:")
         logger.error(e)
+
 
 def create_excel_report(restaurant, date, xml):
     wb = openpyxl.Workbook()
