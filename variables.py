@@ -28,4 +28,4 @@ new_restaurant_cell = "C4"
 vat_sum_col = "O"
 
 
-version = "4.0.0"
+version = "5.0.0"
