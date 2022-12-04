@@ -102,14 +102,11 @@ def xml_part():
                     xml.generate_ending(declarbody, hbos=hbos, hkbos=hkbos)
                     tree = xml.generate_xml(root)
                     date = ex.get_date(ws, var.date_cell)[0]
-                    restaurant = ws[var.restaurant_cell].value
-                    cooking_place = ws[var.cooking_place_cell].value
-                    rest_dir_name = ex.get_dir_name(
-                        restaurant, cooking_place)
-                    file_name = f"{var.xml_target_path}{rest_dir_name}/{date}_{iiko_name}.xml"
-                    if not os.path.exists(f"../../{var.xml_target_path}{rest_dir_name}"):
+                    name_witout_ext = excel_target_file[i][:-5]
+                    file_name = f"{var.xml_target_path}{dir}/{name_witout_ext}.xml"
+                    if not os.path.exists(f"../../{var.xml_target_path}{dir}"):
                         os.makedirs(
-                            f"../../{var.xml_target_path}{rest_dir_name}")
+                            f"../../{var.xml_target_path}{dir}")
                     try:
                         tree.write(f"../../{file_name}",
                                    encoding="windows-1251", xml_declaration=True)
