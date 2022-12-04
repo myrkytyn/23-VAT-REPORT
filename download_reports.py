@@ -18,7 +18,6 @@ def main():
         global config
         config = prop.get_config()
         start_date, end_date, restaurants_list, has_args = parse_args()
-        print(restaurants_list)
         if has_args == False:
             restaurants = []
             restaurants = get_restaurants(restaurants)
