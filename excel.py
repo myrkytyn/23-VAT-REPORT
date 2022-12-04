@@ -20,15 +20,13 @@ def unmerge_cells(ws):
 
 
 def remove_delivery(ws, payment_type_col):
+    i = 0
     for cell in ws[payment_type_col]:
         if cell.value == "Доставка":
-            logger.info("Доставку знайдено. Видалення рядків запущено")
-            i = 1
-            while ws[f"{payment_type_col}{cell.row+i}"].value == None:
-                i += 1
-            ws.delete_rows(cell.row, cell.row+i)
-            logger.info(
-                f"Видалено рядки з доставкою - {cell.row}:{cell.row+i}")
+            ws.delete_rows(cell.row)
+            i += 1
+    logger.info(
+                f"Видалено рядки з доставкою - {i} шт")
     for cell in ws[payment_type_col]:
         if cell.value is not None:
             if "Total" in cell.value or "всего" in cell.value:

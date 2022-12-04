@@ -3,10 +3,12 @@ from loguru import logger
 import json_info as json
 
 
-def get_uktzed(string_dishes, DATABASE, config, place):
+def get_uktzed(string_dishes, DATABASE, config, place, zero_uktzed):
     SERVER, UID, PASSWORD = json.get_info_db(config, place)
     logger.info(
         f"Розпочинаю витягувати коди УКТ ЗЕД з бази даних. Треба трохи зачекати")
+    if zero_uktzed == None:
+        zero_uktzed = '61D63FE7-212C-4847-BA32-1563D97E2424'
     try:
         conn = db.connect(
             f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVER};UID={UID};PWD={PASSWORD};DATABASE={DATABASE}")
@@ -22,7 +24,7 @@ def get_uktzed(string_dishes, DATABASE, config, place):
                        f"FROM [{DATABASE}].[dbo].[entity] dish JOIN [{DATABASE}].[dbo].[entity] outerEanCode "
                        "ON outerEanCode.id = CASE WHEN CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) > 0 THEN "
                        "SUBSTRING( dish.xml, ( CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) + 39 ), ( CHARINDEX( '</outerEconomicActivityNomenclatureCode>', dish.xml ) - CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) - 39 ) ) "
-                       "ELSE '61D63FE7-212C-4847-BA32-1563D97E2424' END "
+                       f"ELSE '{zero_uktzed}' END "
                        "WHERE dish.type = 'Product' AND "
                        f"SUBSTRING( dish.xml, (CHARINDEX('<num>', dish.xml) + 5), ( CHARINDEX('</num>', dish.xml) - CHARINDEX('<num>', dish.xml) - 5 ) ) IN ({string_dishes})")
     except Exception as e:
