@@ -24,7 +24,7 @@ def get_uktzed(string_dishes, DATABASE, config, place, zero_uktzed):
                        f"FROM [{DATABASE}].[dbo].[entity] dish JOIN [{DATABASE}].[dbo].[entity] outerEanCode "
                        "ON outerEanCode.id = CASE WHEN CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) > 0 THEN "
                        "SUBSTRING( dish.xml, ( CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) + 39 ), ( CHARINDEX( '</outerEconomicActivityNomenclatureCode>', dish.xml ) - CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) - 39 ) ) "
-                       f"ELSE {zero_uktzed} END "
+                       f"ELSE '{zero_uktzed}' END "
                        "WHERE dish.type = 'Product' AND "
                        f"SUBSTRING( dish.xml, (CHARINDEX('<num>', dish.xml) + 5), ( CHARINDEX('</num>', dish.xml) - CHARINDEX('<num>', dish.xml) - 5 ) ) IN ({string_dishes})")
     except Exception as e:
