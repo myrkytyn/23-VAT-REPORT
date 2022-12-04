@@ -1,4 +1,3 @@
-import json
 import openpyxl
 import os
 from loguru import logger
@@ -164,7 +163,7 @@ def excel_part(use_db):
                         continue
                     # Get info from JSON file
                     try:
-                        iiko_name, non_excise_dishes, non_excise_groups, db_name, groups_to_get_item_names, zero_uktzed= prop.get_info_xlsx(
+                        non_excise_dishes, non_excise_groups, db_name, groups_to_get_item_names, zero_uktzed = prop.get_info_xlsx(
                             restaurant, config)
                     except Exception as e:
                         logger.error(
@@ -260,14 +259,6 @@ def excel_part(use_db):
                     except Exception as e:
                         logger.error(
                             f"Помилка у модулі визначення назви товару по страві")
-                        logger.error(e)
-                        continue
-                    # Get Date of report
-                    try:
-                        date = ex.get_date(ws, var.date_cell)[0]
-                    except Exception as e:
-                        logger.error(
-                            f"Помилка у модулі отримання дати за яку створено звіт")
                         logger.error(e)
                         continue
                     file_name = f"{var.excel_target_path}{dir}/{excel_source_file[file]}"
