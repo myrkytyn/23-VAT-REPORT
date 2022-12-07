@@ -41,7 +41,7 @@ def xml_part():
         logger.error(e)
         return
     # For all target excels. Working with XML
-    listdir = os.listdir(f"{var.excel_target_path}")
+    listdir = sorted(os.listdir(f"{var.excel_target_path}"))
     for dir in listdir:
         if os.path.isdir(f"{var.excel_target_path}/{dir}"):
             logger.info(f"Створюю податкові накладні для {dir}")
@@ -55,8 +55,7 @@ def xml_part():
                 return
             for i in range(0, len(excel_target_file)):
                 if excel_target_file[i].endswith(".xlsx"):
-                    wb = openpyxl.load_workbook(
-                        excel_target_file[i], data_only=True)
+                    wb = openpyxl.load_workbook(f"{var.excel_target_path}{dir}/{excel_target_file[i]}", data_only=True)
                     ws = wb.active
                     iiko_name, hnamesel, tin, hksel, htinsel, hbos, hkbos = get_info_xml(
                         ws, var.restaurant_cell, config)
@@ -104,11 +103,11 @@ def xml_part():
                     date = ex.get_date(ws, var.date_cell)[0]
                     name_witout_ext = excel_target_file[i][:-5]
                     file_name = f"{var.xml_target_path}{dir}/{name_witout_ext}.xml"
-                    if not os.path.exists(f"../../{var.xml_target_path}{dir}"):
+                    if not os.path.exists(f"{var.xml_target_path}{dir}"):
                         os.makedirs(
-                            f"../../{var.xml_target_path}{dir}")
+                            f"{var.xml_target_path}{dir}")
                     try:
-                        tree.write(f"../../{file_name}",
+                        tree.write(f"{file_name}",
                                    encoding="windows-1251", xml_declaration=True)
                     except Exception as e:
                         logger.error(
@@ -116,7 +115,6 @@ def xml_part():
                         logger.error(e)
                         return
                     logger.info(f"Файл збережено {file_name}")
-            os.chdir("../../")
     logger.info("### XML PART COMPLETED ###")
 
 

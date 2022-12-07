@@ -21,11 +21,11 @@ N = "\033[0m"
 def main():
     config = prop.get_config()
     sheet_id = config.get("test_module").get("sheet_id")
-    listdir = os.listdir(f"{var.excel_target_path}")
-    table = PrettyTable()
-    table.field_names = ["Дата", "Google", "Excel"]
-    table.hrules = ALL
+    listdir = sorted(os.listdir(f"{var.excel_target_path}"))
     for dir in listdir:
+        table = PrettyTable()
+        table.field_names = ["Дата", "Google", "Excel"]
+        table.hrules = ALL
         if os.path.isdir(f"{var.excel_target_path}/{dir}"):
             excel_files = ex.list_excels(
                 f"{var.excel_target_path}{dir}")
@@ -67,15 +67,15 @@ def main():
                    if sum_excel == sum_gsheet:
                        table.add_row([full_date, sum_gsheet, sum_excel])
                    else:
-                       table.add_row([full_date, R+sum_gsheet+N, R+sum_excel+N])
+                       table.add_row([full_date, R+str(sum_gsheet)+N, R+str(sum_excel)+N])
                    #if sum_vat_excel == sum_vat_gsheet:
                    #    logger.info(
                    #        f"Сума ПДВ співпадає! {sum_vat_excel} = {sum_vat_gsheet}")
                    #else:
                    #    logger.warning(
                    #        f"Сума ПДВ в ексель - {sum_vat_excel}, в гугл таблицях - {sum_vat_gsheet}")
-            table.add_row(["","",""])
-    print(table)
+        print(table)
+            
 
 def get_values(spreadsheet_id, range_name):
     creds=None

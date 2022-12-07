@@ -28,7 +28,7 @@ def main():
             input("Мені видається, що все пройшло добре. Натисни Enter для виходу")
     except Exception as e:
         logger.error(e)
-        logger.warning("Не вдалося перевірити чи були помилки при виконанні.")
+        logger.warning(f"Не вдалося перевірити чи були помилки при виконанні. {os.getcwd()}")
         input("Натисни Enter для виходу")
 
 
@@ -76,7 +76,7 @@ def excel_part(use_db):
     global config
     config = prop.get_config()
     # For all files in directories
-    listdir = os.listdir(f"{var.excel_source_path}")
+    listdir = sorted(os.listdir(f"{var.excel_source_path}"))
     for dir in listdir:
         if os.path.isdir(f"{var.excel_source_path}/{dir}"):
             logger.info(f"Створюю Excel ПН для {dir}")
@@ -92,12 +92,12 @@ def excel_part(use_db):
                 if excel_source_file[file].endswith(".xlsx"):
                     # Opening Excel File
                     try:
-                        wb = openpyxl.load_workbook(excel_source_file[file])
+                        wb = openpyxl.load_workbook(f"{var.excel_source_path}{dir}/{excel_source_file[file]}")
                         logger.info(
                             f"\n \n Працюю з файлом {excel_source_file[file]} \n \n")
                     except Exception as e:
                         logger.error(
-                            f"Помилка відкривання файлу {excel_source_file[file]}")
+                            f"Помилка відкривання файлу {excel_source_file[file]}, {os.getcwd()}")
                         logger.error(e)
                         return
                     ws = wb.active
@@ -264,10 +264,10 @@ def excel_part(use_db):
                     file_name = f"{var.excel_target_path}{dir}/{excel_source_file[file]}"
                     ws[var.new_restaurant_cell] = restaurant
 
-                    if not os.path.exists(f"../../{var.excel_target_path}{dir}"):
-                        os.makedirs(f"../../{var.excel_target_path}{dir}")
+                    if not os.path.exists(f"{var.excel_target_path}{dir}"):
+                        os.makedirs(f"{var.excel_target_path}{dir}")
                     try:
-                        wb.save(f"../../{file_name}")
+                        wb.save(f"{file_name}")
                     except Exception as e:
                         logger.error(
                             f"Помилка збереження файлу {file_name}")
@@ -275,7 +275,6 @@ def excel_part(use_db):
                         continue
                     logger.info(f"Файл збережено {file_name}")
                     hnum += 1
-            os.chdir("../../")
     logger.info("### ОБРОБКУ ЗВІТІВ З ФАЙЛІВ ЕКСЕЛЬ ЗАВЕРШЕНО ###")
 
 
