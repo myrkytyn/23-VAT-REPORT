@@ -9,7 +9,7 @@ import get_database as db
 
 
 def list_excels(excel_path):
-    excel_files = os.listdir(f'{excel_path}')
+    excel_files = sorted(os.listdir(f'{excel_path}'))
     return excel_files
 
 

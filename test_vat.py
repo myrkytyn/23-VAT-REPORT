@@ -13,29 +13,23 @@ import re
 import json_info as prop
 
 
-
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
-sheet_id = "1YhhmpgJeFV4d8x7mCDM5atSlf6MCjguhDj1koP7o-gc"
 
 
 def main():
     config = prop.get_config()
+    sheet_id = config.get("test_module").get("sheet_id")
     listdir = os.listdir(f"{var.excel_target_path}")
     print(listdir)
     for dir in listdir:
         if os.path.isdir(f"{var.excel_target_path}/{dir}"):
-            if dir == "Фабрика-фіскал1":
-                sheet = "Фабрика 2022 1 пов ПДВ"
-            elif dir == "Фабрика-фіскал2":
-                sheet = "Фабрика 2022  2 пов ПДВ"
-            else:
-                logger.error(f"Закладу {dir} немає в Google Sheets")
-                return
             excel_files = ex.list_excels(
                 f"{var.excel_target_path}{dir}")
-            logger.info(sheet)
+            print(dir)
+            sheet = get_sheet_name(config, dir)
+            print(sheet)
             print(excel_files)
-            #for i in range(0, len(excel_files)):
+            # for i in range(0, len(excel_files)):
             #    if excel_files[i].endswith(".xlsx"):
             #        wb = openpyxl.load_workbook(
             #            f"{var.excel_target_path}{dir}/{excel_files[i]}", data_only=True)
@@ -99,6 +93,17 @@ def get_values(spreadsheet_id, range_name):
     except HttpError as error:
         logger.error(f"An error occurred: {error}")
         return error
+
+def get_sheet_name(config, restaurant):
+    for entity in config["legal_entities"]:
+        if restaurant in config["legal_entities"][entity]["name"]:
+            if isinstance(config["legal_entities"][entity]["name"], list):
+                position = config["legal_entities"][entity]["name"].index(
+                    restaurant)
+                sheet = config["legal_entities"][entity]["sheet"][position]
+            else:
+                sheet = config["legal_entities"][entity]["sheet"]
+    return sheet
 
 
 if __name__ == '__main__':
