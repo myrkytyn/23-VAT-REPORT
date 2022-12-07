@@ -9,8 +9,7 @@ import get_database as db
 
 
 def list_excels(excel_path):
-    os.chdir(excel_path)
-    excel_files = os.listdir('.')
+    excel_files = sorted(os.listdir(f'{excel_path}'))
     return excel_files
 
 
@@ -120,7 +119,7 @@ def vat_sum(ws, price_col, vat_sum_col):
     for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row-1):
         for cell in row:
             ws[f"{vat_sum_col}{cell.row}"] = round(
-                (float(ws[f"{price_col}{cell.row}"].value))*0.2, 3)
+                (float(ws[f"{price_col}{cell.row}"].value))*0.2, 2)
 
 
 def uktzed(ws, uktzed_col, uktzed_codes, dish_code_col):
