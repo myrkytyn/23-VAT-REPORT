@@ -1,4 +1,15 @@
 from loguru import logger
+import json
+
+
+def get_config():
+    try:
+        config = json.load(open("config.json", "r", encoding="utf-8"))
+        return config
+    except Exception as e:
+        logger.error(
+            "Схоже, що конфігураційного файлу не існує. Будь ласка, перевір!")
+        logger.error(e)
 
 
 def get_info_xlsx(restaurant, config):
@@ -8,9 +19,10 @@ def get_info_xlsx(restaurant, config):
         non_excise_groups = config["legal_entities"][restaurant]["non_excise_groups"]
         db_name = config["legal_entities"][restaurant]["db_name"]
         groups_to_get_item_names = config["legal_entities"][restaurant]["groups_to_get_item_names"]
+        zero_uktzed = config.get("legal_entities").get(restaurant).get("zero_uktzed")
         logger.info(
             f"В ресторані {iiko_name}: \nбезакцизні страви - {non_excise_dishes} \nбезакцизні групи страв - {non_excise_groups}")
-        return (iiko_name, non_excise_dishes, non_excise_groups, db_name, groups_to_get_item_names)
+        return (non_excise_dishes, non_excise_groups, db_name, groups_to_get_item_names, zero_uktzed)
     else:
         logger.error(
             f"{restaurant} не існує в файлі JSON. Будь ласка, перевір!")
@@ -46,7 +58,13 @@ def get_info_db(config, place):
     PASSWORD = config["db_info"]["PASSWORD"]
     return SERVER, UID, PASSWORD
 
+
 def get_info_api(config):
-    username = config["api_info"]["iiko_username"]
-    password = config["api_info"]["iiko_password"]
-    return username, password
+    try:
+        username = config["api_info"]["iiko_username"]
+        password = config["api_info"]["iiko_password"]
+        return username, password
+    except Exception as e:
+        logger.error(
+            "Схоже, що в конфігураційному файлі немає потрібних полів")
+        logger.error(e)
