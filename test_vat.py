@@ -11,98 +11,111 @@ import openpyxl
 from loguru import logger
 import re
 import json_info as prop
+from prettytable import PrettyTable, ALL
 
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
-
+R = "\033[0;31;40m"
+N = "\033[0m"
 
 def main():
     config = prop.get_config()
     sheet_id = config.get("test_module").get("sheet_id")
     listdir = os.listdir(f"{var.excel_target_path}")
-    print(listdir)
+    table = PrettyTable()
+    table.field_names = ["Дата", "Google", "Excel"]
+    table.hrules = ALL
     for dir in listdir:
         if os.path.isdir(f"{var.excel_target_path}/{dir}"):
             excel_files = ex.list_excels(
                 f"{var.excel_target_path}{dir}")
-            print(dir)
             sheet = get_sheet_name(config, dir)
-            print(sheet)
-            print(excel_files)
-            # for i in range(0, len(excel_files)):
-            #    if excel_files[i].endswith(".xlsx"):
-            #        wb = openpyxl.load_workbook(
-            #            f"{var.excel_target_path}{dir}/{excel_files[i]}", data_only=True)
-            #        ws = wb.active
-            #        date = re.sub("[^0-9.]", "", ws[var.date_cell].value)
-            #        full_date = date
-            #        try:
-            #            result = get_values(sheet_id, f"{sheet}!D:D")
-            #        except Exception as e:
-            #            logger.error(
-            #                f"Проблеми з конектом до Google Sheets {os.getcwd()}")
-            #            logger.error(e)
-            #        try:
-            #            index = result["values"].index([full_date])+1
-            #        except Exception as e:
-            #            logger.error(
-            #                f"Щось з датою")
-            #            logger.error(e)
-            #            continue
-            #        sum_excel = float(ws[f"{var.sum_col}{ws.max_row}"].value)
-            #        sum_vat_excel = float(ws[f"{var.vat_sum_col}{ws.max_row}"].value)
-            #        sum_gsheet = float(get_values(sheet_id, f"{sheet}!H{index}")["values"][0][0].replace(',','.'))
-            #        sum_vat_gsheet = float(get_values(sheet_id, f"{sheet}!P{index}")["values"][0][0].replace(',','.'))
-            #        logger.info(f"Дата - {full_date}")
-            #        if sum_excel == sum_gsheet:
-            #            logger.info(f"Сума співпадає! {sum_excel} = {sum_gsheet}")
-            #        else:
-            #            logger.warning(f"Сума в ексель - {sum_excel}, в гугл таблицях - {sum_gsheet}")
-            #        if sum_vat_excel == sum_vat_gsheet:
-            #            logger.info(f"Сума ПДВ співпадає! {sum_vat_excel} = {sum_vat_gsheet}")
-            #        else:
-            #            logger.warning(f"Сума ПДВ в ексель - {sum_vat_excel}, в гугл таблицях - {sum_vat_gsheet}")
-            #        print("")
-
+            table.add_row([dir, "", ""])
+            if dir == "Урбан Спейс":
+                col_date = "A"
+                col_sum = "E"
+            else:
+                col_date = "D"
+                col_sum = "H"
+            for i in range(0, len(excel_files)):
+               if excel_files[i].endswith(".xlsx"):
+                   wb = openpyxl.load_workbook(
+                       f"{var.excel_target_path}{dir}/{excel_files[i]}", data_only=True)
+                   ws = wb.active
+                   date = re.sub("[^0-9.]", "", ws[var.date_cell].value)
+                   full_date = date
+                   try:
+                       result = get_values(sheet_id, f"{sheet}!{col_date}:{col_date}")
+                   except Exception as e:
+                       logger.error(
+                           f"Проблеми з конектом до Google Sheets {os.getcwd()}")
+                       logger.error(e)
+                   try:
+                       index = result["values"].index([full_date])+1
+                   except Exception as e:
+                       logger.error(
+                           f"Щось з датою")
+                       logger.error(e)
+                       continue
+                   sum_excel = float(ws[f"{var.sum_col}{ws.max_row}"].value)
+                   #sum_vat_excel = float(
+                   #    ws[f"{var.vat_sum_col}{ws.max_row}"].value)
+                   sum_gsheet = float(get_values(sheet_id, f"{sheet}!{col_sum}{index}")[
+                                      "values"][0][0].replace(',', '.'))
+                   #sum_vat_gsheet = float(get_values(sheet_id, f"{sheet}!P{index}")[
+                   #                       "values"][0][0].replace(',', '.'))
+                   if sum_excel == sum_gsheet:
+                       table.add_row([full_date, sum_gsheet, sum_excel])
+                   else:
+                       table.add_row([full_date, R+sum_gsheet+N, R+sum_excel+N])
+                   #if sum_vat_excel == sum_vat_gsheet:
+                   #    logger.info(
+                   #        f"Сума ПДВ співпадає! {sum_vat_excel} = {sum_vat_gsheet}")
+                   #else:
+                   #    logger.warning(
+                   #        f"Сума ПДВ в ексель - {sum_vat_excel}, в гугл таблицях - {sum_vat_gsheet}")
+            table.add_row(["","",""])
+    print(table)
 
 def get_values(spreadsheet_id, range_name):
-    creds = None
+    creds=None
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
     if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        creds=Credentials.from_authorized_user_file('token.json', SCOPES)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
+            flow=InstalledAppFlow.from_client_secrets_file(
                 'credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
+            creds=flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
     try:
-        service = build('sheets', 'v4', credentials=creds)
+        service=build('sheets', 'v4', credentials=creds)
 
-        result = service.spreadsheets().values().get(
+        result=service.spreadsheets().values().get(
             spreadsheetId=spreadsheet_id, range=range_name).execute()
-        rows = result.get('values', [])
+        rows=result.get('values', [])
         return result
     except HttpError as error:
         logger.error(f"An error occurred: {error}")
         return error
 
+
 def get_sheet_name(config, restaurant):
     for entity in config["legal_entities"]:
         if restaurant in config["legal_entities"][entity]["name"]:
             if isinstance(config["legal_entities"][entity]["name"], list):
-                position = config["legal_entities"][entity]["name"].index(
+                position=config["legal_entities"][entity]["name"].index(
                     restaurant)
-                sheet = config["legal_entities"][entity]["sheet"][position]
+                sheet=config["legal_entities"][entity]["sheet"][position]
             else:
-                sheet = config["legal_entities"][entity]["sheet"]
+                sheet=config["legal_entities"][entity]["sheet"]
     return sheet
 
 
