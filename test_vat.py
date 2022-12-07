@@ -10,6 +10,7 @@ import excel as ex
 import openpyxl
 from loguru import logger
 import re
+import json_info as prop
 
 
 
@@ -18,7 +19,9 @@ sheet_id = "1YhhmpgJeFV4d8x7mCDM5atSlf6MCjguhDj1koP7o-gc"
 
 
 def main():
+    config = prop.get_config()
     listdir = os.listdir(f"{var.excel_target_path}")
+    print(listdir)
     for dir in listdir:
         if os.path.isdir(f"{var.excel_target_path}/{dir}"):
             if dir == "Фабрика-фіскал1":
@@ -28,43 +31,44 @@ def main():
             else:
                 logger.error(f"Закладу {dir} немає в Google Sheets")
                 return
-            excel_target_file = ex.list_excels(
+            excel_files = ex.list_excels(
                 f"{var.excel_target_path}{dir}")
             logger.info(sheet)
-            for i in range(0, len(excel_target_file)):
-                if excel_target_file[i].endswith(".xlsx"):
-                    wb = openpyxl.load_workbook(
-                        f"{var.excel_target_path}{dir}/{excel_target_file[i]}", data_only=True)
-                    ws = wb.active
-                    date = re.sub("[^0-9.]", "", ws[var.date_cell].value)
-                    full_date = date
-                    try:
-                        result = get_values(sheet_id, f"{sheet}!D:D")
-                    except Exception as e:
-                        logger.error(
-                            f"Проблеми з конектом до Google Sheets {os.getcwd()}")
-                        logger.error(e)
-                    try:
-                        index = result["values"].index([full_date])+1
-                    except Exception as e:
-                        logger.error(
-                            f"Щось з датою")
-                        logger.error(e)
-                        continue
-                    sum_excel = float(ws[f"{var.sum_col}{ws.max_row}"].value)
-                    sum_vat_excel = float(ws[f"{var.vat_sum_col}{ws.max_row}"].value)
-                    sum_gsheet = float(get_values(sheet_id, f"{sheet}!H{index}")["values"][0][0].replace(',','.'))
-                    sum_vat_gsheet = float(get_values(sheet_id, f"{sheet}!P{index}")["values"][0][0].replace(',','.'))
-                    logger.info(f"Дата - {full_date}")
-                    if sum_excel == sum_gsheet:
-                        logger.info(f"Сума співпадає! {sum_excel} = {sum_gsheet}")
-                    else:
-                        logger.warning(f"Сума в ексель - {sum_excel}, в гугл таблицях - {sum_gsheet}")
-                    if sum_vat_excel == sum_vat_gsheet:
-                        logger.info(f"Сума ПДВ співпадає! {sum_vat_excel} = {sum_vat_gsheet}")
-                    else:
-                        logger.warning(f"Сума ПДВ в ексель - {sum_vat_excel}, в гугл таблицях - {sum_vat_gsheet}")
-                    print("")
+            print(excel_files)
+            #for i in range(0, len(excel_files)):
+            #    if excel_files[i].endswith(".xlsx"):
+            #        wb = openpyxl.load_workbook(
+            #            f"{var.excel_target_path}{dir}/{excel_files[i]}", data_only=True)
+            #        ws = wb.active
+            #        date = re.sub("[^0-9.]", "", ws[var.date_cell].value)
+            #        full_date = date
+            #        try:
+            #            result = get_values(sheet_id, f"{sheet}!D:D")
+            #        except Exception as e:
+            #            logger.error(
+            #                f"Проблеми з конектом до Google Sheets {os.getcwd()}")
+            #            logger.error(e)
+            #        try:
+            #            index = result["values"].index([full_date])+1
+            #        except Exception as e:
+            #            logger.error(
+            #                f"Щось з датою")
+            #            logger.error(e)
+            #            continue
+            #        sum_excel = float(ws[f"{var.sum_col}{ws.max_row}"].value)
+            #        sum_vat_excel = float(ws[f"{var.vat_sum_col}{ws.max_row}"].value)
+            #        sum_gsheet = float(get_values(sheet_id, f"{sheet}!H{index}")["values"][0][0].replace(',','.'))
+            #        sum_vat_gsheet = float(get_values(sheet_id, f"{sheet}!P{index}")["values"][0][0].replace(',','.'))
+            #        logger.info(f"Дата - {full_date}")
+            #        if sum_excel == sum_gsheet:
+            #            logger.info(f"Сума співпадає! {sum_excel} = {sum_gsheet}")
+            #        else:
+            #            logger.warning(f"Сума в ексель - {sum_excel}, в гугл таблицях - {sum_gsheet}")
+            #        if sum_vat_excel == sum_vat_gsheet:
+            #            logger.info(f"Сума ПДВ співпадає! {sum_vat_excel} = {sum_vat_gsheet}")
+            #        else:
+            #            logger.warning(f"Сума ПДВ в ексель - {sum_vat_excel}, в гугл таблицях - {sum_vat_gsheet}")
+            #        print("")
 
 
 def get_values(spreadsheet_id, range_name):
