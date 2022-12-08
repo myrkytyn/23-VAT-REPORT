@@ -22,6 +22,7 @@ def main():
     try:
         config = prop.get_config()
         sheet_id = config.get("test_module").get("sheet_id")
+        print(sheet_id)
         listdir = sorted(os.listdir(f"{var.excel_target_path}"))
         for dir in listdir:
             table = PrettyTable()
@@ -32,12 +33,8 @@ def main():
                     f"{var.excel_target_path}{dir}")
                 sheet = get_sheet_name(config, dir)
                 table.add_row([dir, "", ""])
-                if dir == "Урбан Спейс":
-                    col_date = "A"
-                    col_sum = "E"
-                else:
-                    col_date = "D"
-                    col_sum = "H"
+                col_date = "A"
+                col_sum = "E"
                 for i in range(0, len(excel_files)):
                    if excel_files[i].endswith(".xlsx"):
                        wb = openpyxl.load_workbook(
