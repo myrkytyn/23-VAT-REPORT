@@ -19,14 +19,13 @@ def get_uktzed(string_dishes, DATABASE, config, place, zero_uktzed):
         return "None"
     cursor = conn.cursor()
     try:
-        cursor.execute(f"SELECT SUBSTRING( dish.xml, (CHARINDEX('<num>', dish.xml) + 5), ( CHARINDEX('</num>', dish.xml) - CHARINDEX('<num>', dish.xml) - 5 ) ) as 'dish_number', "
-                       "SUBSTRING( outerEanCode.xml, ( CHARINDEX('<outerEanCode>', outerEanCode.xml) + 14 ), ( CHARINDEX('</outerEanCode>', outerEanCode.xml) - CHARINDEX('<outerEanCode>', outerEanCode.xml) - 14 ) ) as 'OuterEanCode' "
-                       f"FROM [{DATABASE}].[dbo].[entity] dish JOIN [{DATABASE}].[dbo].[entity] outerEanCode "
-                       "ON outerEanCode.id = CASE WHEN CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) > 0 THEN "
-                       "SUBSTRING( dish.xml, ( CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) + 39 ), ( CHARINDEX( '</outerEconomicActivityNomenclatureCode>', dish.xml ) - CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) - 39 ) ) "
-                       f"ELSE '{zero_uktzed}' END "
-                       "WHERE dish.type = 'Product' AND "
-                       f"SUBSTRING( dish.xml, (CHARINDEX('<num>', dish.xml) + 5), ( CHARINDEX('</num>', dish.xml) - CHARINDEX('<num>', dish.xml) - 5 ) ) IN ({string_dishes})")
+        cursor.execute("SELECT m.c.value('(name/customValue/text())[1]', 'varchar(50)') as Dish,"
+                        "CAST(outerEanCode.xml AS XML).query('r/outerEanCode').value('.', 'varchar(50)') as OuterEanCode"
+                        f"FROM {DATABASE}.dbo.entity dish"
+                        "CROSS APPLY (SELECT CAST(dish.xml as xml) as realxml) s"
+                        f"CROSS APPLY s.realxml.nodes('r[type = \"DISH\"][num =({string_dishes})]') m(c)"
+                        f"JOIN [{DATABASE}].[dbo].[entity] outerEanCode ON outerEanCode.id =  CAST(dish.xml AS XML).query('r/outerEconomicActivityNomenclatureCode').value('.', 'varchar(50)')"
+                        "WHERE dish.type = 'Product'")
     except Exception as e:
         logger.error(
             "При виконанні запиту щось пішло не так")
