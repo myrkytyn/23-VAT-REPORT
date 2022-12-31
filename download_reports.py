@@ -30,12 +30,12 @@ def main():
         logger.info(f"Буде скачано звіти за {delta.days+1} днів")
         for restaurant in restaurants_list:
             logger.info(f"Скачую звіти для {restaurant}")
-            port, preset_id = set_variables(restaurant)
-            auth(session, port, username, password)
+            port, preset_id, url = set_variables(restaurant)
+            auth(session, port, username, password, url)
             for day in range(delta.days+1):
                 date = (start_date + timedelta(days=day)).strftime("%d.%m.%Y")
                 response = generate_reports(
-                    session, date, preset_id, headers, port)
+                    session, date, preset_id, headers, port, url)
                 if len(response.text) < 1000:
                     logger.warning(
                         f"Звіт за {date} порожній або щось пішло не так. Перевір, будь ласка.")
@@ -91,19 +91,20 @@ def set_variables(restaurant):
     for entity in config["legal_entities"]:
         if restaurant in config["legal_entities"][entity]["name"]:
             port = config["legal_entities"][entity]["port"]
+            url = config["legal_entities"][entity]["url"]
             if isinstance(config["legal_entities"][entity]["name"], list):
                 position = config["legal_entities"][entity]["name"].index(
                     restaurant)
                 preset_id = config["legal_entities"][entity]["preset_id"][position]
             else:
                 preset_id = config["legal_entities"][entity]["preset_id"]
-    return port, preset_id
+    return port, preset_id, url
 
 
-def auth(session, port, username, password):
+def auth(session, port, username, password, url):
     try:
         response = session.post(
-            f"http://iiko.23.ua:{port}/resto/j_spring_security_check?j_username={username}&j_password={password}&_spring_security_remember_me=on&submit=Log+in")
+            f"https://{url}/resto/j_spring_security_check?j_username={username}&j_password={password}&_spring_security_remember_me=on&submit=Log+in")
     except Exception as e:
         logger.error(
             "Помилка в запиті авторизації")
@@ -115,10 +116,10 @@ def auth(session, port, username, password):
     return response
 
 
-def generate_reports(session, date, preset_id, headers, port):
+def generate_reports(session, date, preset_id, headers, port, url):
     try:
         response = session.get(
-            f"http://iiko.23.ua:{port}/resto/service/reports/report.jspx?dateFrom={date}&dateTo={date}&presetId={preset_id}", headers=headers)
+            f"https://{url}/resto/service/reports/report.jspx?dateFrom={date}&dateTo={date}&presetId={preset_id}", headers=headers)
     except Exception as e:
         logger.error(
             "Помилка в запиті звіту IIKO")
