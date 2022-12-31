@@ -9,6 +9,13 @@ def get_uktzed(string_dishes, DATABASE, config, place, zero_uktzed):
         f"Розпочинаю витягувати коди УКТ ЗЕД з бази даних. Треба трохи зачекати")
     if zero_uktzed == None:
         zero_uktzed = '61D63FE7-212C-4847-BA32-1563D97E2424'
+    uktzed_query = f"""SELECT m.c.value('(name/customValue/text())[1]', 'varchar(50)') as Dish,
+    CAST(outerEanCode.xml AS XML).query('r/outerEanCode').value('.', 'varchar(50)') as OuterEanCode
+    FROM {DATABASE}.dbo.entity dish
+    CROSS APPLY (SELECT CAST(dish.xml as xml) as realxml) s
+    CROSS APPLY s.realxml.nodes('r[type = \"DISH\"][num =({string_dishes})]') m(c)
+    JOIN {DATABASE}.dbo.entity outerEanCode ON outerEanCode.id =  CAST(dish.xml AS XML).query('r/outerEconomicActivityNomenclatureCode').value('.', 'varchar(50)')
+    WHERE dish.type = 'Product'"""
     try:
         conn = db.connect(
             f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVER};UID={UID};PWD={PASSWORD};DATABASE={DATABASE}")
@@ -17,15 +24,9 @@ def get_uktzed(string_dishes, DATABASE, config, place, zero_uktzed):
             "Не можу з'єднатися з базою даних :(")
         logger.error(e)
         return "None"
-    cursor = conn.cursor()
+    cursor = conn.cursor(uktzed_query)
     try:
-        cursor.execute("SELECT m.c.value('(name/customValue/text())[1]', 'varchar(50)') as Dish,"
-                        "CAST(outerEanCode.xml AS XML).query('r/outerEanCode').value('.', 'varchar(50)') as OuterEanCode"
-                        f"FROM {DATABASE}.dbo.entity dish"
-                        "CROSS APPLY (SELECT CAST(dish.xml as xml) as realxml) s"
-                        f"CROSS APPLY s.realxml.nodes('r[type = \"DISH\"][num =({string_dishes})]') m(c)"
-                        f"JOIN [{DATABASE}].[dbo].[entity] outerEanCode ON outerEanCode.id =  CAST(dish.xml AS XML).query('r/outerEconomicActivityNomenclatureCode').value('.', 'varchar(50)')"
-                        "WHERE dish.type = 'Product'")
+        cursor.execute()
     except Exception as e:
         logger.error(
             "При виконанні запиту щось пішло не так")
