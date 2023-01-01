@@ -3,22 +3,20 @@ from loguru import logger
 import json_info as json
 
 
-def get_uktzed(string_dishes, DATABASE, config, place, zero_uktzed):
+def get_uktzed(string_dishes, DATABASE, config, place):
     SERVER, UID, PASSWORD = json.get_info_db(config, place)
     logger.info(
         f"Розпочинаю витягувати коди УКТ ЗЕД з бази даних. Треба трохи зачекати")
-    if zero_uktzed == None:
-        zero_uktzed = '61D63FE7-212C-4847-BA32-1563D97E2424'
-    uktzed_query = f"""SELECT m.c.value('(name/customValue/text())[1]', 'varchar(50)') as Dish,
+    uktzed_query = f"""SELECT m.c.value('(num/text())[1]', 'varchar(50)') as DishNumber,
     CAST(outerEanCode.xml AS XML).query('r/outerEanCode').value('.', 'varchar(50)') as OuterEanCode
     FROM {DATABASE}.dbo.entity dish
     CROSS APPLY (SELECT CAST(dish.xml as xml) as realxml) s
     CROSS APPLY s.realxml.nodes('r[type = \"DISH\"][num =({string_dishes})]') m(c)
     JOIN {DATABASE}.dbo.entity outerEanCode ON outerEanCode.id =  CAST(dish.xml AS XML).query('r/outerEconomicActivityNomenclatureCode').value('.', 'varchar(50)')
     WHERE dish.type = 'Product'"""
+    connection_string = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVER};UID={UID};PWD={PASSWORD};DATABASE={DATABASE}"
     try:
-        conn = db.connect(
-            f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVER};UID={UID};PWD={PASSWORD};DATABASE={DATABASE}")
+        conn = db.connect(connection_string)
     except Exception as e:
         logger.error(
             "Не можу з'єднатися з базою даних :(")
@@ -41,9 +39,9 @@ def get_uktzed(string_dishes, DATABASE, config, place, zero_uktzed):
 
 def get_item_name(num, DATABASE, config, place):
     SERVER, UID, PASSWORD = json.get_info_db(config, place)
+    connection_string = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVER};UID={UID};PWD={PASSWORD};DATABASE={DATABASE}"
     try:
-        conn = db.connect(
-            f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVER};UID={UID};PWD={PASSWORD};DATABASE={DATABASE}")
+        conn = db.connect(connection_string)
     except Exception as e:
         logger.error(
             "Не можу з'єднатися з базою даних :(")
