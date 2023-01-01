@@ -22,9 +22,9 @@ def get_uktzed(string_dishes, DATABASE, config, place):
             "Не можу з'єднатися з базою даних :(")
         logger.error(e)
         return "None"
-    cursor = conn.cursor(uktzed_query)
+    cursor = conn.cursor()
     try:
-        cursor.execute()
+        cursor.execute(uktzed_query)
     except Exception as e:
         logger.error(
             "При виконанні запиту щось пішло не так")
