@@ -11,6 +11,7 @@ from openpyxl.styles import Font
 import xml.etree.ElementTree as ET
 import variables as var
 import argparse
+import excel as ex
 
 
 def main():
@@ -209,6 +210,7 @@ def create_excel_report(restaurant, date, xml):
         raise Exception()
 
     set_formats(ws)
+    ex.set_text_format(ws, var.quantity_col)
     try:
         if not os.path.exists(f"./{var.excel_source_path}"):
             os.makedirs(f"./{var.excel_source_path}")
@@ -242,6 +244,8 @@ def set_formats(ws):
         for cell in row:
             ws[f"H{cell.row}"] = float(ws[f"H{cell.row}"].value)
             ws[f"I{cell.row}"] = float(ws[f"I{cell.row}"].value)
+
+
 
 
 if __name__ == "__main__":

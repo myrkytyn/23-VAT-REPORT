@@ -263,7 +263,8 @@ def excel_part(use_db):
                         continue
                     file_name = f"{var.excel_target_path}{dir}/{excel_source_file[file]}"
                     ws[var.new_restaurant_cell] = restaurant
-
+                    ex.set_text_format(ws, var.dish_code_col)
+                    ex.set_text_format(ws, var.uktzed_col)
                     if not os.path.exists(f"{var.excel_target_path}{dir}"):
                         os.makedirs(f"{var.excel_target_path}{dir}")
                     try:
