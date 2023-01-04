@@ -12,8 +12,8 @@ def get_uktzed(string_dishes, DATABASE, config, place):
     FROM {DATABASE}.dbo.entity dish
     CROSS APPLY (SELECT CAST(dish.xml as xml) as realxml) s
     CROSS APPLY s.realxml.nodes('r[type = \"DISH\"][num =({string_dishes})]') m(c)
-    JOIN {DATABASE}.dbo.entity outerEanCode ON outerEanCode.id =  CAST(dish.xml AS XML).query('r/outerEconomicActivityNomenclatureCode').value('.', 'varchar(50)')
-    WHERE dish.type = 'Product'"""
+    JOIN {DATABASE}.dbo.entity outerEanCode ON outerEanCode.id = m.c.value('(outerEconomicActivityNomenclatureCode/text())[1]', 'varchar(50)')
+    WHERE dish.type = 'Product' AND dish.deleted = 0"""
     connection_string = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVER};UID={UID};PWD={PASSWORD};DATABASE={DATABASE}"
     try:
         conn = db.connect(connection_string)
