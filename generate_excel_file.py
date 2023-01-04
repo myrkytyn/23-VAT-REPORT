@@ -163,7 +163,7 @@ def excel_part(use_db):
                         continue
                     # Get info from JSON file
                     try:
-                        non_excise_dishes, non_excise_groups, db_name, groups_to_get_item_names, zero_uktzed = prop.get_info_xlsx(
+                        non_excise_dishes, non_excise_groups, db_name, groups_to_get_item_names = prop.get_info_xlsx(
                             restaurant, config)
                     except Exception as e:
                         logger.error(
@@ -176,7 +176,7 @@ def excel_part(use_db):
                             dish_codes = ex.get_dish_codes(
                                 ws, var.dish_code_col)
                             uktzed_codes = gdb.get_uktzed(
-                                dish_codes, db_name, config, var.place, zero_uktzed)
+                                dish_codes, db_name, config, var.place)
                             if uktzed_codes != "None":
                                 ex.uktzed(ws, var.uktzed_col,
                                           uktzed_codes, var.dish_code_col)

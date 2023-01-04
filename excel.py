@@ -213,12 +213,12 @@ def get_total(ws, sum_without_excise_col, sum_without_vat_col, sum_col, vat_sum_
 
 
 def get_dish_codes(ws, dish_code_col):
-    dish_codes = ""
-    dish_code = ""
+    dish_codes = ''
+    dish_code = ''
     for row in ws.iter_rows(min_col=4, max_col=4, min_row=6, max_row=ws.max_row):
         for cell in row:
             dish_code = ws[f"{dish_code_col}{cell.row}"].value
-            dish_codes += f"'{dish_code}',"
+            dish_codes += f'"{dish_code}",'
     dish_codes = dish_codes[:-1]
     return dish_codes
 

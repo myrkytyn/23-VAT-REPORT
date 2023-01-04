@@ -3,15 +3,20 @@ from loguru import logger
 import json_info as json
 
 
-def get_uktzed(string_dishes, DATABASE, config, place, zero_uktzed):
+def get_uktzed(string_dishes, DATABASE, config, place):
     SERVER, UID, PASSWORD = json.get_info_db(config, place)
     logger.info(
         f"Розпочинаю витягувати коди УКТ ЗЕД з бази даних. Треба трохи зачекати")
-    if zero_uktzed == None:
-        zero_uktzed = '61D63FE7-212C-4847-BA32-1563D97E2424'
+    uktzed_query = f"""SELECT m.c.value('(num/text())[1]', 'varchar(50)') as DishNumber,
+    CAST(outerEanCode.xml AS XML).query('r/outerEanCode').value('.', 'varchar(50)') as OuterEanCode
+    FROM {DATABASE}.dbo.entity dish
+    CROSS APPLY (SELECT CAST(dish.xml as xml) as realxml) s
+    CROSS APPLY s.realxml.nodes('r[type = (\"DISH\", \"MODIFIER\")][num =({string_dishes})]') m(c)
+    JOIN {DATABASE}.dbo.entity outerEanCode ON outerEanCode.id = m.c.value('(outerEconomicActivityNomenclatureCode/text())[1]', 'varchar(50)')
+    WHERE dish.type = 'Product' AND dish.deleted = 0"""
+    connection_string = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVER};UID={UID};PWD={PASSWORD};DATABASE={DATABASE}"
     try:
-        conn = db.connect(
-            f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVER};UID={UID};PWD={PASSWORD};DATABASE={DATABASE}")
+        conn = db.connect(connection_string)
     except Exception as e:
         logger.error(
             "Не можу з'єднатися з базою даних :(")
@@ -19,14 +24,7 @@ def get_uktzed(string_dishes, DATABASE, config, place, zero_uktzed):
         return "None"
     cursor = conn.cursor()
     try:
-        cursor.execute(f"SELECT SUBSTRING( dish.xml, (CHARINDEX('<num>', dish.xml) + 5), ( CHARINDEX('</num>', dish.xml) - CHARINDEX('<num>', dish.xml) - 5 ) ) as 'dish_number', "
-                       "SUBSTRING( outerEanCode.xml, ( CHARINDEX('<outerEanCode>', outerEanCode.xml) + 14 ), ( CHARINDEX('</outerEanCode>', outerEanCode.xml) - CHARINDEX('<outerEanCode>', outerEanCode.xml) - 14 ) ) as 'OuterEanCode' "
-                       f"FROM [{DATABASE}].[dbo].[entity] dish JOIN [{DATABASE}].[dbo].[entity] outerEanCode "
-                       "ON outerEanCode.id = CASE WHEN CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) > 0 THEN "
-                       "SUBSTRING( dish.xml, ( CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) + 39 ), ( CHARINDEX( '</outerEconomicActivityNomenclatureCode>', dish.xml ) - CHARINDEX( '<outerEconomicActivityNomenclatureCode>', dish.xml ) - 39 ) ) "
-                       f"ELSE '{zero_uktzed}' END "
-                       "WHERE dish.type = 'Product' AND "
-                       f"SUBSTRING( dish.xml, (CHARINDEX('<num>', dish.xml) + 5), ( CHARINDEX('</num>', dish.xml) - CHARINDEX('<num>', dish.xml) - 5 ) ) IN ({string_dishes})")
+        cursor.execute(uktzed_query)
     except Exception as e:
         logger.error(
             "При виконанні запиту щось пішло не так")
@@ -41,9 +39,11 @@ def get_uktzed(string_dishes, DATABASE, config, place, zero_uktzed):
 
 def get_item_name(num, DATABASE, config, place):
     SERVER, UID, PASSWORD = json.get_info_db(config, place)
+    connection_string = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVER};UID={UID};PWD={PASSWORD};DATABASE={DATABASE}"
+    logger.info(
+        f"Розпочинаю витягувати назви товарів з бази даних. Треба трохи зачекати")
     try:
-        conn = db.connect(
-            f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVER};UID={UID};PWD={PASSWORD};DATABASE={DATABASE}")
+        conn = db.connect(connection_string)
     except Exception as e:
         logger.error(
             "Не можу з'єднатися з базою даних :(")
