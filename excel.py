@@ -251,4 +251,5 @@ def item_names(ws, groups_to_get_item_names, dish_code_col, dishes_group_col, it
 
 
 def set_text_format(ws, row):
-    ws[row].number_format = '@'
+    for cell in ws[row]:
+        cell.number_format = '@'
