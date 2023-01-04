@@ -40,6 +40,8 @@ def get_uktzed(string_dishes, DATABASE, config, place):
 def get_item_name(num, DATABASE, config, place):
     SERVER, UID, PASSWORD = json.get_info_db(config, place)
     connection_string = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVER};UID={UID};PWD={PASSWORD};DATABASE={DATABASE}"
+    logger.info(
+        f"Розпочинаю витягувати назви товарів з бази даних. Треба трохи зачекати")
     try:
         conn = db.connect(connection_string)
     except Exception as e:
