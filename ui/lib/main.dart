@@ -1,6 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:ui/widgets/color_switch_text_row.dart';
+import 'package:ui/widgets/color_text_button.dart';
+import 'package:ui/widgets/header.dart';
+import 'package:ui/widgets/text_button_with_icon.dart';
 import 'package:window_size/window_size.dart';
 import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
@@ -65,7 +69,6 @@ class MainPage extends StatefulWidget {
 
 class MainPageState extends State<MainPage> {
   String dir = Directory.current.path;
-  bool database = true;
   bool isChecked = false;
 
   Color getColor(Set<MaterialState> states) {
@@ -112,42 +115,7 @@ class MainPageState extends State<MainPage> {
     return Scaffold(
       body: Column(
         children: [
-          Container(
-              color: '#DDDDDD'.toColor(),
-              width: 1200.0,
-              height: 125.0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextButton(
-                    style: TextButton.styleFrom(
-                        backgroundColor: '#E41E12'.toColor(),
-                        padding: const EdgeInsets.fromLTRB(14, 25, 14, 25),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                          15,
-                        ))),
-                    onPressed: () {},
-                    child: Text('Податкові накладні',
-                        style: TextStyle(
-                            fontSize: 30, color: '#EFEFEF'.toColor())),
-                  ),
-                  //  const SizedBox(width: 100),
-                  //  TextButton(
-                  //    style: TextButton.styleFrom(
-                  //        backgroundColor: '#E41E12'.toColor(),
-                  //        padding: const EdgeInsets.fromLTRB(14, 25, 14, 25),
-                  //        shape: RoundedRectangleBorder(
-                  //            borderRadius: BorderRadius.circular(
-                  //          15,
-                  //        ))),
-                  //    onPressed: () {},
-                  //    child: Text('Акциз',
-                  //        style: TextStyle(
-                  //            fontSize: 30, color: '#EFEFEF'.toColor())),
-                  //  ),
-                ],
-              )),
+          const Header("Податкові накладні", 30),
           const SizedBox(height: 50),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -170,6 +138,7 @@ class MainPageState extends State<MainPage> {
                   restaurant_list(),
                   const SizedBox(height: 60),
                   Row(children: [
+                    const SizedBox(width: 10),
                     Text('Від:',
                         style: TextStyle(
                             fontWeight: FontWeight.w500,
@@ -213,33 +182,7 @@ class MainPageState extends State<MainPage> {
                     ),
                   ]),
                   const SizedBox(height: 20),
-                  Row(children: [
-                    TextButton(
-                      style: TextButton.styleFrom(
-                          backgroundColor: '#E41E12'.toColor(),
-                          padding: const EdgeInsets.fromLTRB(24, 18, 24, 18),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                            15,
-                          ))),
-                      onPressed: () {},
-                      child: Text('Скачати звіти',
-                          style: TextStyle(
-                              fontSize: 20, color: '#EFEFEF'.toColor())),
-                    ),
-                    const SizedBox(width: 10),
-                    IconButton(
-                      color: '#595959'.toColor(),
-                      icon: const Icon(
-                        Icons.folder,
-                      ),
-                      iconSize: 40,
-                      onPressed: () {
-                        final Uri url = Uri.parse('file:$dir/iiko_reports/');
-                        launchUrl(url);
-                      },
-                    )
-                  ]),
+                  const TextButtonWithIcon("Скачати звіти", 20),
                   const SizedBox(width: 700)
                 ],
               ),
@@ -263,79 +206,10 @@ class MainPageState extends State<MainPage> {
                     ),
                   ),
                   const SizedBox(height: 100),
-                  Row(children: [
-                    TextButton(
-                      style: TextButton.styleFrom(
-                          backgroundColor: '#E41E12'.toColor(),
-                          padding: const EdgeInsets.fromLTRB(24, 18, 24, 18),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                            15,
-                          ))),
-                      onPressed: () {},
-                      child: Text('Cтворити ПН Excel',
-                          style: TextStyle(
-                              fontSize: 20, color: '#EFEFEF'.toColor())),
-                    ),
-                    const SizedBox(width: 10),
-                    IconButton(
-                      color: '#595959'.toColor(),
-                      icon: const Icon(
-                        Icons.folder,
-                      ),
-                      iconSize: 40,
-                      onPressed: () {
-                        final Uri url =
-                            Uri.parse('file:$dir/excel_files_generated/');
-                        launchUrl(url);
-                      },
-                    )
-                  ]),
+                  const TextButtonWithIcon("Створити звіти Excel", 20),
                   const SizedBox(height: 45),
-                  Row(children: [
-                    TextButton(
-                      style: TextButton.styleFrom(
-                          backgroundColor: '#E41E12'.toColor(),
-                          padding: const EdgeInsets.fromLTRB(24, 18, 24, 18),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                            15,
-                          ))),
-                      onPressed: () {},
-                      child: Text('Cтворити ПН XML  ',
-                          style: TextStyle(
-                              fontSize: 20, color: '#EFEFEF'.toColor())),
-                    ),
-                    const SizedBox(width: 10),
-                    IconButton(
-                      color: '#595959'.toColor(),
-                      icon: const Icon(
-                        Icons.folder,
-                      ),
-                      iconSize: 40,
-                      onPressed: () {
-                        final Uri url =
-                            Uri.parse('file:$dir/xml_files_generated/');
-                        launchUrl(url);
-                      },
-                    )
-                  ]),
-                  Row(
-                    children: [
-                      Text('База даних',
-                          style: TextStyle(
-                              fontSize: 25, color: '#595959'.toColor())),
-                      Switch(
-                        value: database,
-                        activeColor: Colors.red,
-                        onChanged: (bool value) {
-                          setState(() {
-                            database = value;
-                          });
-                        },
-                      )
-                    ],
-                  )
+                  const TextButtonWithIcon("Створити звіти XML", 20),
+                  ColorSwitchTextRow(true, "База даних")
                 ],
               )
             ],
@@ -345,3 +219,25 @@ class MainPageState extends State<MainPage> {
     );
   }
 }
+
+//TODO
+//final Uri url =
+//Uri.parse('file:$dir/excel_files_generated/');
+//launchUrl(url);
+
+//Create openfolder func for foldericons
+
+
+//TextButton(
+//                    style: TextButton.styleFrom(
+//                        backgroundColor: '#E41E12'.toColor(),
+//                        padding: const EdgeInsets.fromLTRB(14, 25, 14, 25),
+//                        shape: RoundedRectangleBorder(
+//                            borderRadius: BorderRadius.circular(
+//                          15,
+//                        ))),
+//                    onPressed: () {},
+//                    child: Text('Податкові накладні',
+//                        style: TextStyle(
+//                            fontSize: 30, color: '#EFEFEF'.toColor())),
+//                  ),
