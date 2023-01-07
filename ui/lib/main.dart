@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:ui/widgets/color_switch_text_row.dart';
 import 'package:ui/widgets/color_text_button.dart';
+import 'package:ui/widgets/date_row.dart';
 import 'package:ui/widgets/header.dart';
+import 'package:ui/widgets/left_column.dart';
 import 'package:ui/widgets/text_button_with_icon.dart';
 import 'package:window_size/window_size.dart';
 import 'dart:io';
@@ -121,10 +123,7 @@ class MainPageState extends State<MainPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [SizedBox(width: 100)]),
+              const LeftColumn(),
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,51 +135,8 @@ class MainPageState extends State<MainPage> {
                           color: '#595959'.toColor())),
                   const SizedBox(height: 40),
                   restaurant_list(),
-                  const SizedBox(height: 60),
-                  Row(children: [
-                    const SizedBox(width: 10),
-                    Text('Від:',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 20,
-                            color: '#595959'.toColor())),
-                    const SizedBox(width: 250),
-                    Text('До:',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 20,
-                            color: '#595959'.toColor())),
-                  ]),
-                  const SizedBox(height: 5),
-                  Row(children: [
-                    SizedBox(
-                      width: 200,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15)),
-                          hintText: 'дд.мм.рррр',
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 35),
-                    Text('-',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 30,
-                            color: '#595959'.toColor())),
-                    const SizedBox(width: 35),
-                    SizedBox(
-                      width: 200,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15)),
-                          hintText: 'дд.мм.рррр',
-                        ),
-                      ),
-                    ),
-                  ]),
+                  const SizedBox(height: 20),
+                  const DateRow("дд.мм.ррр", "Від", "До"),
                   const SizedBox(height: 20),
                   const TextButtonWithIcon("Скачати звіти", 20),
                   const SizedBox(width: 700)

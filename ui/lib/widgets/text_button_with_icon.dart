@@ -20,7 +20,7 @@ class _TextButtonWithIconState extends State<TextButtonWithIcon> {
       IconButton(
         color: Style.GREY,
         icon: const Icon(
-          Icons.folder,
+          Icons.folder_open,
         ),
         iconSize: 40,
         onPressed: () {},
