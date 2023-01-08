@@ -22,7 +22,7 @@ extension ColorExtension on String {
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    setWindowTitle('Податковий помічий 23.');
+    setWindowTitle('Податковий помічник 23.');
     setWindowMaxSize(const Size(1200, 900));
     setWindowMinSize(const Size(1200, 900));
   }
@@ -37,6 +37,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       home: MainPage(),
+      title: 'Податковий помічник 23.',
       debugShowCheckedModeBanner: false,
     );
   }
