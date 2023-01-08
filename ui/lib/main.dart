@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:ui/use_case/restaurant_list.dart';
+import 'package:ui/widgets/checkbox_text.dart';
+import 'package:ui/widgets/checkbox_text_list.dart';
 import 'package:ui/widgets/color_switch_text_row.dart';
-import 'package:ui/widgets/color_text_button.dart';
 import 'package:ui/widgets/date_row.dart';
 import 'package:ui/widgets/header.dart';
 import 'package:ui/widgets/left_column.dart';
@@ -32,24 +34,6 @@ void main() {
   runApp(App());
 }
 
-getRestaurnats() {
-  File file = File('/home/maksym/Maks/Projects/23-VAT-REPORT/config.json');
-  String contents = file.readAsStringSync();
-  var restaurants = [];
-  var config = jsonDecode(contents) as Map;
-  var entities = config['legal_entities'] as Map;
-
-  for (var entity in entities.keys) {
-    if (config["legal_entities"][entity]["name"] is List) {
-      config["legal_entities"][entity]["name"]
-          .forEach((element) => restaurants.add(element));
-    } else {
-      restaurants.add(config["legal_entities"][entity]["name"]);
-    }
-  }
-  return restaurants;
-}
-
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -70,47 +54,8 @@ class MainPage extends StatefulWidget {
 }
 
 class MainPageState extends State<MainPage> {
-  String dir = Directory.current.path;
+  //String dir = Directory.current.path;
   bool isChecked = false;
-
-  Color getColor(Set<MaterialState> states) {
-    const Set<MaterialState> interactiveStates = <MaterialState>{
-      MaterialState.pressed,
-      MaterialState.hovered,
-      MaterialState.focused,
-    };
-    if (states.any(interactiveStates.contains)) {
-      return Colors.blue;
-    }
-    return Colors.red;
-  }
-
-  Widget restaurant_list() {
-    List<Widget> list = [];
-    var restaurants = getRestaurnats();
-    restaurants.forEach((item) {
-      list.add(Row(children: [
-        Checkbox(
-          checkColor: Colors.white,
-          fillColor: MaterialStateProperty.resolveWith(getColor),
-          value: isChecked,
-          onChanged: (bool? value) {
-            setState(() {
-              isChecked = value!;
-            });
-          },
-        ),
-        Text(item, style: TextStyle(fontSize: 25, color: '#595959'.toColor()))
-      ]));
-      list.add(const SizedBox(height: 15));
-    });
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: list,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,9 +79,9 @@ class MainPageState extends State<MainPage> {
                           fontSize: 40,
                           color: '#595959'.toColor())),
                   const SizedBox(height: 40),
-                  restaurant_list(),
+                  const CheckBoxTextList(),
                   const SizedBox(height: 20),
-                  const DateRow("дд.мм.ррр", "Від", "До"),
+                  const DateRow("дд.мм.рррр", "Від", "До"),
                   const SizedBox(height: 20),
                   const TextButtonWithIcon("Скачати звіти", 20),
                   const SizedBox(width: 700)
