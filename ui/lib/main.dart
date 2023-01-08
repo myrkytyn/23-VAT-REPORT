@@ -1,8 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:ui/use_case/restaurant_list.dart';
-import 'package:ui/widgets/checkbox_text.dart';
 import 'package:ui/widgets/checkbox_text_list.dart';
 import 'package:ui/widgets/color_switch_text_row.dart';
 import 'package:ui/widgets/date_row.dart';
@@ -31,7 +27,7 @@ void main() {
     setWindowMinSize(const Size(1200, 900));
   }
 
-  runApp(App());
+  runApp(const App());
 }
 
 class App extends StatelessWidget {
