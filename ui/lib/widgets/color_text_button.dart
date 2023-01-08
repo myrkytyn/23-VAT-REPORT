@@ -15,7 +15,7 @@ class _ColorTextButtonState extends State<ColorTextButton> {
   Widget build(BuildContext context) {
     return TextButton(
       style: TextButton.styleFrom(
-          backgroundColor: Style.LIGHT_RED,
+          backgroundColor: Style.RED,
           padding: const EdgeInsets.fromLTRB(24, 18, 24, 18),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),

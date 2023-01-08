@@ -4,20 +4,10 @@ import 'package:ui/widgets/color_switch_text_row.dart';
 import 'package:ui/widgets/date_row.dart';
 import 'package:ui/widgets/header.dart';
 import 'package:ui/widgets/left_column.dart';
+import 'package:ui/widgets/text.dart';
 import 'package:ui/widgets/text_button_with_icon.dart';
 import 'package:window_size/window_size.dart';
 import 'dart:io';
-import 'package:url_launcher/url_launcher.dart';
-
-extension ColorExtension on String {
-  toColor() {
-    var hexString = this;
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
-  }
-}
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,9 +41,6 @@ class MainPage extends StatefulWidget {
 }
 
 class MainPageState extends State<MainPage> {
-  //String dir = Directory.current.path;
-  bool isChecked = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,30 +56,22 @@ class MainPageState extends State<MainPage> {
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Ресторани:',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 40,
-                          color: '#595959'.toColor())),
-                  const SizedBox(height: 40),
-                  const CheckBoxTextList(),
-                  const SizedBox(height: 20),
-                  const DateRow("дд.мм.рррр", "Від", "До"),
-                  const SizedBox(height: 20),
-                  const TextButtonWithIcon("Скачати звіти", 20),
-                  const SizedBox(width: 700)
+                children: const [
+                  ColoredText("Ресторани", 40, FontWeight.w600),
+                  SizedBox(height: 40),
+                  CheckBoxTextList(25, FontWeight.w400),
+                  SizedBox(height: 20),
+                  DateRow("дд.мм.рррр", "Від", "До"),
+                  SizedBox(height: 20),
+                  TextButtonWithIcon("Скачати звіти", 20, "iiko_reports"),
+                  SizedBox(width: 700)
                 ],
               ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Статус:",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 30,
-                          color: '#595959'.toColor())),
+                  const ColoredText("Статус", 30, FontWeight.w600),
                   const SizedBox(
                     height: 200,
                     width: 340,
@@ -104,10 +83,12 @@ class MainPageState extends State<MainPage> {
                     ),
                   ),
                   const SizedBox(height: 100),
-                  const TextButtonWithIcon("Створити звіти Excel", 20),
+                  const TextButtonWithIcon(
+                      "Створити звіти Excel", 20, "excel_files_generated"),
+                  ColorSwitchTextRow(true, "База даних"),
                   const SizedBox(height: 45),
-                  const TextButtonWithIcon("Створити звіти XML", 20),
-                  ColorSwitchTextRow(true, "База даних")
+                  const TextButtonWithIcon(
+                      "Створити звіти XML", 20, "xml_files_generated")
                 ],
               )
             ],
@@ -117,25 +98,3 @@ class MainPageState extends State<MainPage> {
     );
   }
 }
-
-//TODO
-//final Uri url =
-//Uri.parse('file:$dir/excel_files_generated/');
-//launchUrl(url);
-
-//Create openfolder func for foldericons
-
-
-//TextButton(
-//                    style: TextButton.styleFrom(
-//                        backgroundColor: '#E41E12'.toColor(),
-//                        padding: const EdgeInsets.fromLTRB(14, 25, 14, 25),
-//                        shape: RoundedRectangleBorder(
-//                            borderRadius: BorderRadius.circular(
-//                          15,
-//                        ))),
-//                    onPressed: () {},
-//                    child: Text('Податкові накладні',
-//                        style: TextStyle(
-//                            fontSize: 30, color: '#EFEFEF'.toColor())),
-//                  ),
