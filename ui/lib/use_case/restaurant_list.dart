@@ -3,7 +3,7 @@ import 'dart:io';
 
 class GetRestaurnats {
   static getRestaurnatsList() {
-    File file = File('/home/maksym/Maks/Projects/23-VAT-REPORT/config.json');
+    File file = File('../config.json');
     String contents = file.readAsStringSync();
     var restaurants = [];
     var config = jsonDecode(contents) as Map;
