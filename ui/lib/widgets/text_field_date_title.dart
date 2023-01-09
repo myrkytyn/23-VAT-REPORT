@@ -5,7 +5,9 @@ import 'package:ui/widgets/text_field_date.dart';
 class TextFieldDateTitle extends StatefulWidget {
   final String _hintText;
   final String _text;
-  const TextFieldDateTitle(this._hintText, this._text, {super.key});
+  final TextEditingController myController;
+  const TextFieldDateTitle(this._hintText, this._text, this.myController,
+      {super.key});
 
   @override
   State<TextFieldDateTitle> createState() => _TextFieldDateTitleState();
@@ -27,7 +29,7 @@ class _TextFieldDateTitleState extends State<TextFieldDateTitle> {
                     color: Style.GREY)),
           ]),
           const SizedBox(height: 2),
-          TextFieldDate(widget._hintText)
+          TextFieldDate(widget._hintText, widget.myController)
         ]);
   }
 }

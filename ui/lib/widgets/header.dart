@@ -20,7 +20,7 @@ class _HeaderState extends State<Header> {
         height: 125.0,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [ColorTextButton(widget._text, widget.textSize)],
+          children: [ColorTextButton(widget._text, widget.textSize, (){})],
         ));
   }
 }
