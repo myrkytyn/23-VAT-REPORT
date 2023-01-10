@@ -101,9 +101,10 @@ class MainPageState extends State<MainPage> {
                   }, () {
                     if (useDatabase) {
                       RunExecutable.runProgram(
-                          "start generate_excel_file.exe -db");
+                          "start generate_excel_file.exe -db True");
                     } else {
-                      RunExecutable.runProgram("start generate_excel_file.exe");
+                      RunExecutable.runProgram(
+                          "start generate_excel_file.exe -db False");
                     }
                   }),
                   ColorSwitchTextRow(useDatabase, "База даних"),
