@@ -3,7 +3,7 @@ import 'dart:io';
 
 class GetRestaurnats {
   static getRestaurnatsList() {
-    File file = File('../config.json');
+    File file = File('config.json');
     String contents = file.readAsStringSync();
     var restaurants = [];
     var config = jsonDecode(contents) as Map;

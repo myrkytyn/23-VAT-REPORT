@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ui/use_case/check_date.dart';
+import 'package:ui/use_case/check_data.dart';
 import 'package:ui/use_case/open_folder.dart';
+import 'package:ui/use_case/run_exe.dart';
 import 'package:ui/widgets/checkbox_text_list.dart';
 import 'package:ui/widgets/color_switch_text_row.dart';
 import 'package:ui/widgets/date_row.dart';
@@ -71,8 +72,15 @@ class MainPageState extends State<MainPage> {
                   TextButtonWithIcon("Скачати звіти", 20, () {
                     OpenFolder.openFolder("iiko_reports");
                   }, () {
-                    CheckDate.checkRegEx(
-                        fromDateController.text, toDateController.text);
+                    String fromDate = fromDateController.text;
+                    String toDate = toDateController.text;
+                    if (CheckData.checkRegEx(fromDate, toDate) &&
+                        CheckData.checkDateExisted(fromDate, toDate) &&
+                        CheckData.checkRestaurantsCheckbox()) {
+                      var restaurants = CheckData.getCheckBoxesValue();
+                      RunExecutable.runProgram(
+                          "start iiko_reports.exe -sd $fromDate -ed $toDate -r $restaurants");
+                    }
                   }),
                   const SizedBox(width: 700)
                 ],

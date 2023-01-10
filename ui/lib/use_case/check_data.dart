@@ -1,16 +1,19 @@
 import 'package:intl/intl.dart';
-import 'package:ui/use_case/run_exe.dart';
+import 'package:ui/widgets/checkbox_text_list.dart';
 
-class CheckDate {
+class CheckData {
   static checkRegEx(fromDate, toDate) {
-    var regExp = RegExp(
+    bool dateValid = false;
+    RegExp regExp = RegExp(
         r"(0[1-9]|[12][0-9]|3[01])\.(0[13578]|1[02])\.(2022|2023|2024|2025)|(0[1-9]|[12][0-9]|30)\.(0[469]|11)\.(2022|2023|2024|2025)|(0[1-9]|[12][0-9])\.02\.(2022|2023|2024|2025)");
     if (regExp.hasMatch(fromDate) && regExp.hasMatch(toDate)) {
-      checkDateExisted(fromDate, toDate);
+      dateValid = true;
     }
+    return dateValid;
   }
 
   static checkDateExisted(fromDate, toDate) {
+    bool dateExists = false;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     var fromDateDate = DateFormat('dd.MM.yyyy').parse(fromDate);
@@ -25,9 +28,29 @@ class CheckDate {
         toDateSplitted.isAtSameMomentAs(today)) {
       if (fromDateSplitted.isBefore(toDateSplitted) ||
           fromDateSplitted.isAtSameMomentAs(toDateSplitted)) {
-        RunExecutable.runProgram(
-            "start ../iiko_reports.exe -sd $fromDate -ed $toDate -r Делікація");
+        dateExists = true;
       }
     }
+    return dateExists;
+  }
+
+  static checkRestaurantsCheckbox() {
+    bool isChecked = false;
+    CheckBoxTextList.restaurantsMap.forEach((key, value) {
+      if (value == true) {
+        isChecked = true;
+      }
+    });
+    return isChecked;
+  }
+
+  static getCheckBoxesValue() {
+    var restaurantList = [];
+    CheckBoxTextList.restaurantsMap.forEach((key, value) {
+      if (value == true) {
+        restaurantList.add(key);
+      }
+    });
+    return restaurantList;
   }
 }
