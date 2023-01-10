@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ui/main.dart';
 import 'package:ui/styles/colors.dart';
 
 class ColorSwitch extends StatefulWidget {
@@ -18,6 +19,7 @@ class _ColorSwitchState extends State<ColorSwitch> {
       onChanged: (bool value) {
         setState(() {
           widget.database = value;
+          MainPageState.useDatabase = widget.database;
         });
       },
     );

@@ -46,6 +46,7 @@ class MainPage extends StatefulWidget {
 class MainPageState extends State<MainPage> {
   final fromDateController = TextEditingController();
   final toDateController = TextEditingController();
+  static bool useDatabase = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,22 +94,25 @@ class MainPageState extends State<MainPage> {
                   const SizedBox(
                     height: 200,
                     width: 340,
-                    child: Expanded(
-                      child: Text(
-                        'a long text',
-                        overflow: TextOverflow.clip,
-                      ),
-                    ),
                   ),
                   const SizedBox(height: 100),
                   TextButtonWithIcon("Створити звіти Excel", 20, () {
                     OpenFolder.openFolder("excel_files_generated");
-                  }, () {}),
-                  ColorSwitchTextRow(true, "База даних"),
+                  }, () {
+                    if (useDatabase) {
+                      RunExecutable.runProgram(
+                          "start generate_excel_file.exe -db");
+                    } else {
+                      RunExecutable.runProgram("start generate_excel_file.exe");
+                    }
+                  }),
+                  ColorSwitchTextRow(useDatabase, "База даних"),
                   const SizedBox(height: 45),
                   TextButtonWithIcon("Створити звіти XML", 20, () {
                     OpenFolder.openFolder("xml_files_generated");
-                  }, () {})
+                  }, () {
+                    RunExecutable.runProgram("start generate_xml_file.exe");
+                  })
                 ],
               )
             ],

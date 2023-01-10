@@ -45,12 +45,13 @@ class CheckData {
   }
 
   static getCheckBoxesValue() {
-    var restaurantList = [];
+    String restaurantList = "";
     CheckBoxTextList.restaurantsMap.forEach((key, value) {
       if (value == true) {
-        restaurantList.add(key);
+        restaurantList = "$restaurantList$key ";
       }
     });
+    restaurantList = restaurantList.substring(0, restaurantList.length - 1);
     return restaurantList;
   }
 }
