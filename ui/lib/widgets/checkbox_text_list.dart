@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:ui/widgets/checkbox_text.dart';
 
 import '../use_case/restaurant_list.dart';
 
 class CheckBoxTextList extends StatefulWidget {
   final double _textSize;
-  final _fontWeight;
+  final FontWeight _fontWeight;
   const CheckBoxTextList(this._textSize, this._fontWeight, {super.key});
 
   @override

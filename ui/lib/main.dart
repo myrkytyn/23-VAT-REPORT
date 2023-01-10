@@ -71,7 +71,8 @@ class MainPageState extends State<MainPage> {
                   TextButtonWithIcon("Скачати звіти", 20, () {
                     OpenFolder.openFolder("iiko_reports");
                   }, () {
-                    CheckDate.checkRegEx(fromDateController.text, toDateController.text);
+                    CheckDate.checkRegEx(
+                        fromDateController.text, toDateController.text);
                   }),
                   const SizedBox(width: 700)
                 ],

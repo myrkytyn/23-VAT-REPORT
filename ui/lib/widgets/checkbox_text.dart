@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:ui/styles/colors.dart';
 import 'package:ui/widgets/text.dart';
 
@@ -8,7 +6,7 @@ class CheckboxText extends StatefulWidget {
   bool isChecked = true;
   final String _text;
   final double _textSize;
-  final _fontWeight;
+  final FontWeight _fontWeight;
   CheckboxText(this._text, this._textSize, this._fontWeight, {super.key});
 
   @override

@@ -25,8 +25,9 @@ class CheckDate {
         toDateSplitted.isAtSameMomentAs(today)) {
       if (fromDateSplitted.isBefore(toDateSplitted) ||
           fromDateSplitted.isAtSameMomentAs(toDateSplitted)) {
-            RunExecutable.runProgram();
-          }
+        RunExecutable.runProgram(
+            "start ../iiko_reports.exe -sd $fromDate -ed $toDate -r Делікація");
+      }
     }
   }
 }

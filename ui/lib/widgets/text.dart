@@ -4,7 +4,7 @@ import 'package:ui/styles/colors.dart';
 class ColoredText extends StatelessWidget {
   final String _text;
   final double _textSize;
-  final _fontWeight;
+  final FontWeight _fontWeight;
   const ColoredText(this._text, this._textSize, this._fontWeight, {super.key});
 
   @override
